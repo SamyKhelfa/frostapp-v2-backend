@@ -1,0 +1,17 @@
+version: '3.8'
+services: 
+  postgres:
+    image: postgres:15-alpine
+    hostname: postgres
+    restart: always
+    container_name: frost-app-db
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+volumes:
+  postgres: 
+    name: frost-app-data
