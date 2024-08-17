@@ -1,8 +1,8 @@
 import { JwtService } from '@nestjs/jwt';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt'
-import { RegisterDTO } from './dto'
-import { IRegisterResponse } from './responses'
+import { RegisterDTO, LoginDTO } from './dto'
+import { IRegisterResponse, ILoginResponse } from './responses'
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client'
 
@@ -19,6 +19,44 @@ export class AuthService {
         return this.jwtService.sign({
             userId: user.id
         })
+    }
+
+    async login(dto: LoginDTO): Promise<ILoginResponse> {
+        const { email, password } = dto;
+
+        if(!email || !password) {
+            throw new HttpException(
+                'Email and password are required',
+                HttpStatus.BAD_REQUEST
+            )
+        }
+
+        const user = await this.prisma.user.findUnique({ where : { email } })
+
+        if(!user) {
+            throw new HttpException(
+                'Email or password are incorrect',
+                HttpStatus.UNAUTHORIZED
+            )
+        }
+
+        const isCorrectPassword = bcrypt.compareSync(password, user.password);
+
+        if(!isCorrectPassword) {
+            throw new HttpException(
+                'Email or password are incorrect',
+                HttpStatus.UNAUTHORIZED
+            )
+        }
+
+        const authToken = this.getToken(user);
+
+        user.password = ""
+
+        return {
+            user,
+            authToken
+        }
     }
 
     async register(dto: RegisterDTO): Promise<IRegisterResponse> {
