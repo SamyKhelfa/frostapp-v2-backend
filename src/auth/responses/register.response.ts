@@ -4,3 +4,4 @@ export interface IRegisterResponse {
     user: User
     authToken: string;
 }
+
