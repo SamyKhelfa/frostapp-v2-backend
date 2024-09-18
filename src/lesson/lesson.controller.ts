@@ -30,17 +30,17 @@ export class LessonsController{
     return res.status(HttpStatus.OK).send([])
   }
 
-  @Post("/lesson")
-  async create(
-    @Res() res: Response,
-    @Req() req: Request
-    @ApiBody({
+  // @Post("/lesson")
+  // async create(
+  //   @Res() res: Response,
+  //   @Req() req: Request
+  //   @ApiBody({
       
 
-    })
-  ) {
-    return res.status(HttpStatus.OK).send([])
-  }
+  //   })
+  // ) {
+  //   return res.status(HttpStatus.OK).send([])
+  // }
 
 }
 
