@@ -22,11 +22,26 @@ export class LessonDTO {
     })
     userIds?: number[]
 
-    // @ApiProperty({
-    //     description: "Array of chapters associated with this lesson",
-    //     example: [1, 2, 3],
-    // })
+    @ApiProperty({
+        description: "Array of chapters associated with this lesson",
+        example: [1, 2, 3],
+        required: false
 
+    })
+    chapterIds?: number[];
 
+    
 
+}
+
+export class LessonResponseDTO extends LessonDTO{
+    @ApiProperty({
+        description:'Creation timestamp'
+    })
+    createdAt: Date
+
+    @ApiProperty({
+        description:'Last update timestamp'
+    })
+    updatedAt: Date
 }
