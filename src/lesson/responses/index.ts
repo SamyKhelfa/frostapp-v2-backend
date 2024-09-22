@@ -1,1 +1,1 @@
-export * from './lesson-create.response'
+export * from './lesson.response'

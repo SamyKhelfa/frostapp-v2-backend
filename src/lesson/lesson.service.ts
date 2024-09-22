@@ -3,6 +3,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { LessonCreateDTO } from "./dto";
 import { LessonResponse } from "./responses";
 import { getConnectIds } from "../utils";
+import { LessonFindAllResponse } from "./responses/lesson-find-all.response";
 @Injectable()
 export class LessonService {
     constructor(
@@ -11,7 +12,7 @@ export class LessonService {
     ){}
 
     // replace any by response type
-    async findAll(): Promise<any> {
+    async findAll(): Promise<LessonFindAllResponse> {
         return this.prisma.lesson.findMany({
             include: {
                 chapters: true,
@@ -24,6 +25,7 @@ export class LessonService {
             }
         })
     }
+
 
 
     async create(dto: LessonCreateDTO) : Promise<LessonResponse> {
@@ -52,3 +54,7 @@ export class LessonService {
         })
     }
 }
+
+
+
+ 
