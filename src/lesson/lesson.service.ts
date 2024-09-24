@@ -13,6 +13,7 @@ export class LessonService {
 
     // replace any by response type
     async findAll(): Promise<LessonFindAllResponse> {
+
         return this.prisma.lesson.findMany({
             include: {
                 chapters: true,
