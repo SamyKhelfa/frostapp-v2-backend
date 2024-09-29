@@ -1,7 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Chapter } from '@prisma/client'
 
-export class LessonCreateResponse {
+export class LessonUpdateDTO {
     @ApiProperty({
         description : "Title of Lesson",
         example: "How to take cold shower ?"
@@ -16,28 +15,16 @@ export class LessonCreateResponse {
 
     @ApiProperty({
         description: "Array of user IDs associated with this lesson",
-        example: [],
+        example: [1, 2, 3],
         required: false
     })
-    users?: {
-        id: number,
-        name: string
-    }[]
+    users?: number[]
 
     @ApiProperty({
         description: "Array of chapters associated with this lesson",
-        example: [],
+        example: [1, 2, 3],
         required: false
-    })
-    chapters?: Chapter[];
 
-    @ApiProperty({
-        description:'Creation timestamp'
     })
-    createdAt: Date
-
-    @ApiProperty({
-        description:'Last update timestamp'
-    })
-    updatedAt: Date
+    chapters?: number[];
 }

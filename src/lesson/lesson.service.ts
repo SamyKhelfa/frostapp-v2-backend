@@ -1,9 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { LessonCreateDTO } from "./dto";
-import { LessonResponse } from "./responses";
 import { getConnectIds } from "../utils";
-import { LessonFindAllResponse } from "./responses/lesson-find-all.response";
+import { Lesson } from "@prisma/client";
+import { LessonFindByIdDTO } from "./dto/lesson-find-by-id";
+import { LessonUpdateDTO } from "./dto/lesson-update.dto";
+
 @Injectable()
 export class LessonService {
     constructor(
@@ -12,8 +14,7 @@ export class LessonService {
     ){}
 
     // replace any by response type
-    async findAll(): Promise<LessonFindAllResponse> {
-
+    async findAll(): Promise<Lesson[]> {
         return this.prisma.lesson.findMany({
             include: {
                 chapters: true,
@@ -23,13 +24,29 @@ export class LessonService {
                         name: true
                     }
                 }
+            },
+        })
+    }
+
+    async findById(dto: LessonFindByIdDTO) : Promise<Lesson> {
+        return this.prisma.lesson.findUnique({
+            where:{
+                id: Number(dto.lessonId)
             }
         })
     }
 
+    async update(id: number, dto: LessonUpdateDTO) : Promise<Lesson> {
+        return this.prisma.lesson.update({
+            where:{id},
+            data: dto,
+        })
+    }
+    
 
 
-    async create(dto: LessonCreateDTO) : Promise<LessonResponse> {
+
+    async create(dto: LessonCreateDTO) : Promise<Lesson> {
         const { title, description, users, chapters } = dto
 
         return this.prisma.lesson.create({
@@ -55,6 +72,7 @@ export class LessonService {
         })
     }
 }
+
 
 
 
