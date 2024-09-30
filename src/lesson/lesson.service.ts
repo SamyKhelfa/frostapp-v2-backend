@@ -5,6 +5,7 @@ import { getConnectIds } from "../utils";
 import { Lesson } from "@prisma/client";
 import { LessonFindByIdDTO } from "./dto/lesson-find-by-id";
 import { LessonUpdateDTO } from "./dto/lesson-update.dto";
+import { LessonDeleteDTO } from "./dto/lesson-delete.dto";
 
 @Injectable()
 export class LessonService {
@@ -13,7 +14,6 @@ export class LessonService {
         private prisma: PrismaService
     ){}
 
-    // replace any by response type
     async findAll(): Promise<Lesson[]> {
         return this.prisma.lesson.findMany({
             include: {
@@ -37,9 +37,17 @@ export class LessonService {
     }
 
     async update(id: number, dto: LessonUpdateDTO) : Promise<Lesson> {
+        const { title, description, chapters } = dto;
+
         return this.prisma.lesson.update({
             where:{id},
-            data: dto,
+            data: {
+                title,
+                description,
+                chapters: {
+                    connect: getConnectIds(chapters)
+                }
+            }
         })
     }
     
@@ -71,6 +79,23 @@ export class LessonService {
             }
         })
     }
+
+    async delete(id: number, dto: LessonDeleteDTO): Promise<Lesson> {
+        const { title, description, chapters } = dto;
+
+        return this.prisma.lesson.update({
+            where:{id},
+            data: {
+                title,
+                description,
+                chapters: {
+                    connect: getConnectIds(chapters)
+                }
+            }
+        })
+    }
+
+
 }
 
 

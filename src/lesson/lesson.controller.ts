@@ -10,6 +10,7 @@ import {
     Put,
     Req,
     Res,
+    Delete,
   } from '@nestjs/common'; 
 import { Response } from 'express';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -17,6 +18,7 @@ import { LessonService } from './lesson.service'
 import { LessonCreateDTO } from './dto';
 import { LessonFindByIdDTO } from './dto/lesson-find-by-id';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
+import { LessonDeleteDTO } from './dto/lesson-delete.dto';
 @ApiTags('Lesson')
 @Controller({
     path: "lessons",
@@ -109,6 +111,26 @@ export class LessonsController{
         error.message,
         error?.status || HttpStatus.BAD_REQUEST
     )
+    }
+  }
+
+  @Delete("/:lessonId")
+  @ApiParam({
+    name: 'lessonId',
+    example:1,
+    description: "The id of the lesson",
+  })
+  async delete(
+    @Param('lessonId') lessonId: string,
+    @Body() deleteDto: LessonDeleteDTO,
+    @Res() res: Response
+  ): Promise<Response>{
+    try{
+      await this.lessonService.delete(Number(lessonId), deleteDto)
+      return res.status(HttpStatus.NO_CONTENT).send()
+    } catch(error){
+      error.message,
+      error?.status || HttpStatus.BAD_REQUEST
     }
   }
 
