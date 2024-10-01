@@ -83,7 +83,7 @@ export class LessonService {
     async delete(id: number, dto: LessonDeleteDTO): Promise<Lesson> {
         const { title, description, chapters } = dto;
 
-        return this.prisma.lesson.update({
+        return this.prisma.lesson.delete({
             where:{id},
             data: {
                 title,
