@@ -16,7 +16,6 @@ import { Response } from 'express';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LessonService } from './lesson.service'
 import { LessonCreateDTO } from './dto';
-import { LessonFindByIdDTO } from './dto/lesson-find-by-id';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
 import { LessonDeleteDTO } from './dto/lesson-delete.dto';
 @ApiTags('Lesson')
@@ -52,11 +51,11 @@ export class LessonsController{
     description: 'The id of the lesson',
   })
   async findById(
-    @Param() params: LessonFindByIdDTO,
+    @Param('lessonId') lessonId: string,
     @Res() res: Response
   ) {
     try {
-      const lesson = await this.lessonService.findById(params)
+      const lesson = await this.lessonService.findById(Number(lessonId))
 
       return res.status(HttpStatus.OK).send(lesson)
     } catch (error) {
@@ -100,11 +99,12 @@ export class LessonsController{
   })
   async update(
     @Param('lessonId') lessonId: string,
-    @Body() updateDto: LessonUpdateDTO,
+    @Body() dto: LessonUpdateDTO,
     @Res() res: Response
   ): Promise<Response>{
     try {
-      const lesson = await this.lessonService.update(Number(lessonId), updateDto)
+      const lesson = await this.lessonService.update(Number(lessonId), dto)
+
       return res.status(HttpStatus.OK).send(lesson)
     } catch (error) {
       throw new HttpException(
@@ -122,11 +122,11 @@ export class LessonsController{
   })
   async delete(
     @Param('lessonId') lessonId: string,
-    @Body() deleteDto: LessonDeleteDTO,
     @Res() res: Response
   ): Promise<Response>{
     try{
-      await this.lessonService.delete(Number(lessonId), deleteDto)
+      await this.lessonService.delete(Number(lessonId))
+      
       return res.status(HttpStatus.NO_CONTENT).send()
     } catch(error){
       error.message,

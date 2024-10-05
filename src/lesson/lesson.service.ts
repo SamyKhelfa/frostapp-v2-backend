@@ -3,7 +3,6 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { LessonCreateDTO } from "./dto";
 import { getConnectIds } from "../utils";
 import { Lesson } from "@prisma/client";
-import { LessonFindByIdDTO } from "./dto/lesson-find-by-id";
 import { LessonUpdateDTO } from "./dto/lesson-update.dto";
 import { LessonDeleteDTO } from "./dto/lesson-delete.dto";
 
@@ -14,25 +13,28 @@ export class LessonService {
         private prisma: PrismaService
     ){}
 
+    private includeData = {
+        chapters: true,
+        users: {
+            select: {
+                id: true,
+                name: true
+            }
+        }
+    }
+
     async findAll(): Promise<Lesson[]> {
         return this.prisma.lesson.findMany({
-            include: {
-                chapters: true,
-                users: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                }
-            },
+            include: this.includeData,
         })
     }
 
-    async findById(dto: LessonFindByIdDTO) : Promise<Lesson> {
+    async findById(id: number) : Promise<Lesson> {
         return this.prisma.lesson.findUnique({
-            where:{
-                id: Number(dto.lessonId)
-            }
+            where: {
+                id
+            },
+            include: this.includeData,
         })
     }
 
@@ -41,6 +43,7 @@ export class LessonService {
 
         return this.prisma.lesson.update({
             where:{id},
+            include: this.includeData,
             data: {
                 title,
                 description,
@@ -58,15 +61,7 @@ export class LessonService {
         const { title, description, users, chapters } = dto
 
         return this.prisma.lesson.create({
-            include: {
-                chapters: true,
-                users: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                }
-            },
+            include: this.includeData,
             data: {
                 title,
                 description,
@@ -80,25 +75,9 @@ export class LessonService {
         })
     }
 
-    async delete(id: number, dto: LessonDeleteDTO): Promise<Lesson> {
-        const { title, description, chapters } = dto;
-
-        return this.prisma.lesson.delete({
+    async delete(id: number): Promise<void> {
+        await this.prisma.lesson.delete({
             where:{id},
-            data: {
-                title,
-                description,
-                chapters: {
-                    connect: getConnectIds(chapters)
-                }
-            }
         })
     }
-
-
 }
-
-
-
-
- 
