@@ -4,7 +4,6 @@ import { LessonCreateDTO } from "./dto";
 import { getConnectIds } from "../utils";
 import { Lesson } from "@prisma/client";
 import { LessonUpdateDTO } from "./dto/lesson-update.dto";
-import { LessonDeleteDTO } from "./dto/lesson-delete.dto";
 
 @Injectable()
 export class LessonService {

@@ -17,7 +17,6 @@ import { ApiBearerAuth, ApiBody, ApiParam, ApiOperation, ApiTags } from '@nestjs
 import { LessonService } from './lesson.service'
 import { LessonCreateDTO } from './dto';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
-import { LessonDeleteDTO } from './dto/lesson-delete.dto';
 @ApiTags('Lesson')
 @Controller({
     path: "lessons",
