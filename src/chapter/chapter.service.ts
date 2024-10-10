@@ -46,7 +46,7 @@ async create(dto: ChapterCreateDTO) : Promise<Chapter>{
 }
 
 async update(id:number, dto: ChapterUpdateDTO) : Promise<Chapter> {
-    const {title, description, image, status, position, lessonId} = dto
+    const {title, description, image, status, position} = dto
 
     return this.prisma.chapter.update({
         where:{id},
