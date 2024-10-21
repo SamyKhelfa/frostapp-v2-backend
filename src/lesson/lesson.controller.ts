@@ -23,6 +23,7 @@ import {
 import { LessonService } from './lesson.service';
 import { LessonCreateDTO } from './dto';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
+
 @ApiTags('Lesson')
 @Controller({
   path: 'lessons',
@@ -34,6 +35,7 @@ export class LessonsController {
     private readonly lessonService: LessonService,
   ) {}
 
+  @ApiBearerAuth()
   @Get('/')
   async findAll(@Res() res: Response) {
     try {
@@ -47,6 +49,7 @@ export class LessonsController {
     }
   }
 
+  @ApiBearerAuth()
   @Get('/:lessonId')
   @ApiParam({
     name: 'lessonId',
@@ -66,6 +69,7 @@ export class LessonsController {
     }
   }
 
+  @ApiBearerAuth()
   @Post('/')
   @ApiBody({
     description: 'lesson',
@@ -87,6 +91,7 @@ export class LessonsController {
     }
   }
 
+  @ApiBearerAuth()
   @Put('/:lessonId')
   @ApiParam({
     name: 'lessonId',
@@ -114,6 +119,7 @@ export class LessonsController {
     }
   }
 
+  @ApiBearerAuth()
   @Delete('/:lessonId')
   @ApiParam({
     name: 'lessonId',

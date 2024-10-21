@@ -30,6 +30,7 @@ import { ChapterUpdateDTO } from './dto/chapter-update.dto';
 export class ChapterController {
   constructor(private readonly chapterService: ChapterService) {}
 
+  @ApiBearerAuth()
   @Get('/')
   async findAll(@Res() res: Response) {
     try {
@@ -43,6 +44,7 @@ export class ChapterController {
     }
   }
 
+  @ApiBearerAuth()
   @Get('/:chapterId')
   @ApiParam({
     name: 'chapterId',
@@ -61,6 +63,7 @@ export class ChapterController {
     }
   }
 
+  @ApiBearerAuth()
   @Post()
   @ApiBody({
     description: 'chapter',
@@ -81,6 +84,7 @@ export class ChapterController {
     }
   }
 
+  @ApiBearerAuth()
   @Put('/:chapterId')
   @ApiParam({
     name: 'chapterId',
@@ -107,6 +111,7 @@ export class ChapterController {
     }
   }
 
+  @ApiBearerAuth()
   @Delete('/:chapterId')
   @ApiParam({
     name: 'chapterId',
