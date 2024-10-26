@@ -25,6 +25,11 @@ export class ChapterModule implements NestModule {
         path: 'chapters/:chapterId',
       },
       {
+        method: RequestMethod.POST,
+        path: 'chapters',
+        version: '1',
+      },
+      {
         method: RequestMethod.PUT,
         path: 'chapters/:chapterId',
         version: '1',
