@@ -28,27 +28,27 @@ model Lesson {
 }
 
 model Chapter {
-  id          Int          @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   title       String
   description String
   image       String
   status      Boolean
   position    Int
-  Lesson      Lesson?      @relation(fields: [lessonId], references: [id])
+  Lesson      Lesson?  @relation(fields: [lessonId], references: [id])
   lessonId    Int?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  SubChapter  SubChapter[]
+  SubChapter SubChapter[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model SubChapter {
-  id          Int      @id @default(autoincrement())
-  title       String
+  id Int @id @default(autoincrement())
+  title  String
   description String
-  video       String
-  duration    Int
-  active      Boolean
-  position    Int
-  Chapter     Chapter? @relation(fields: [chapterId], references: [id])
-  chapterId   Int?
+  video String
+  duration Int
+  active Boolean
+  position Int
+  Chapter Chapter? @relation(fields: [chapterId], references: [id])
+  chapterId Int?
 }
