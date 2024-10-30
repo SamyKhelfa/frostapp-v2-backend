@@ -26,8 +26,14 @@ export class SubChapterUpdateDTO {
   position: number;
 
   @ApiProperty({
-    description: 'ID of the lesson this chapter belongs to',
+    description: 'Status of subchapter',
+    example: true,
+  })
+  status: boolean;
+
+  @ApiProperty({
+    description: 'ID of the chapter this subchapter belongs to',
     example: 1,
   })
-  subChapterId: number;
+  chapterId: number;
 }

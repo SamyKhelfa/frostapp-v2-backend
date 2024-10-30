@@ -45,7 +45,7 @@ export class SubChapterService {
     });
   }
 
-  async update(id: number, dto: ChapterUpdateDTO): Promise<SubChapter> {
+  async update(id: number, dto: SubChapterUpdateDTO): Promise<SubChapter> {
     const { title, description, video, status, position, chapterId } = dto;
 
     return this.prisma.subChapter.update({
