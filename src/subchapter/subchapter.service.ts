@@ -4,7 +4,6 @@ import { SubChapterCreateDTO } from './dto/subchapter-create.dto';
 import { getConnectIds } from 'src/utils';
 import { Prisma, SubChapter } from '@prisma/client';
 import { SubChapterUpdateDTO } from './dto/subchapter-update.dto';
-import { ChapterUpdateDTO } from 'src/chapter/dto/chapter-update.dto';
 
 @Injectable()
 export class SubChapterService {

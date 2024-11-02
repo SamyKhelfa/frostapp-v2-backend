@@ -51,4 +51,5 @@ model SubChapter {
   position Int
   Chapter Chapter? @relation(fields: [chapterId], references: [id])
   chapterId Int?
+  status Boolean
 }

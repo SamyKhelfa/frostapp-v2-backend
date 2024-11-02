@@ -26,20 +26,26 @@ export class SubChapterCreateDTO {
   position: number;
 
   @ApiProperty({
-    description: 'ID of the lesson this chapter belongs to',
-    example: 1,
-  })
-  subChapterId: number;
-
-  @ApiProperty({
     description: 'Status of subchapter',
     example: true,
   })
   status: boolean;
 
   @ApiProperty({
+    description: 'Active status of subchapter',
+    example: true,
+  })
+  active: boolean;
+
+  @ApiProperty({
     description: 'ID of the chapter this subchapter belongs to',
     example: 1,
   })
   chapterId: number;
+
+  @ApiProperty({
+    description: 'The duration of the video',
+    example: 1,
+  })
+  duration: number;
 }
