@@ -26,10 +26,22 @@ export class SubChapterUpdateDTO {
   position: number;
 
   @ApiProperty({
+    description: 'The duration of the video',
+    example: 1,
+  })
+  duration: number;
+
+  @ApiProperty({
     description: 'Status of subchapter',
     example: true,
   })
   status: boolean;
+
+  @ApiProperty({
+    description: 'Active status of subchapter',
+    example: true,
+  })
+  active: boolean;
 
   @ApiProperty({
     description: 'ID of the chapter this subchapter belongs to',

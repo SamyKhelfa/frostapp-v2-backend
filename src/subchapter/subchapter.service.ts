@@ -29,12 +29,23 @@ export class SubChapterService {
   }
 
   async create(dto: SubChapterCreateDTO): Promise<SubChapter> {
-    const { title, description, video, status, position, chapterId } = dto;
+    const {
+      title,
+      description,
+      active,
+      duration,
+      video,
+      status,
+      position,
+      chapterId,
+    } = dto;
 
     return this.prisma.subChapter.create({
       data: {
         title,
         description,
+        duration,
+        active,
         video,
         status,
         position,
@@ -45,7 +56,16 @@ export class SubChapterService {
   }
 
   async update(id: number, dto: SubChapterUpdateDTO): Promise<SubChapter> {
-    const { title, description, video, status, position, chapterId } = dto;
+    const {
+      title,
+      description,
+      duration,
+      active,
+      video,
+      status,
+      position,
+      chapterId,
+    } = dto;
 
     return this.prisma.subChapter.update({
       where: { id },
@@ -54,6 +74,8 @@ export class SubChapterService {
         title,
         description,
         video,
+        duration,
+        active,
         status,
         position,
         chapterId,
