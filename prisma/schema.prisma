@@ -12,6 +12,7 @@ model User {
   email     String   @unique
   password  String
   name      String
+  role  UserRolesEnum @default(user)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   lessons   Lesson[]
@@ -52,4 +53,9 @@ model SubChapter {
   Chapter Chapter? @relation(fields: [chapterId], references: [id])
   chapterId Int?
   status Boolean
+}
+
+enum UserRolesEnum {
+  admin
+  user
 }
