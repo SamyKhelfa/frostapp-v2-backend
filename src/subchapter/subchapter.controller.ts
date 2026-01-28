@@ -9,12 +9,17 @@ import {
   Res,
   Delete,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { SubChapterCreateDTO } from './dto/subchapter-create.dto';
 import { SubChapterUpdateDTO } from './dto/subchapter-update.dto';
 import { SubChapterService } from './subchapter.service';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { IsAuthenticatedGuard } from '../guards';
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { UserRolesEnum } from '@prisma/client';
 
 @ApiTags('SubChapter')
 @Controller({
@@ -25,6 +30,7 @@ export class SubChapterController {
   constructor(private readonly subChapterService: SubChapterService) {}
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard)
   @Get('/')
   async findAll(@Res() res: Response) {
     try {
@@ -39,6 +45,7 @@ export class SubChapterController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard)
   @Get('/:subchapterId')
   @ApiParam({
     name: 'subchapterId',
@@ -63,6 +70,8 @@ export class SubChapterController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard, RolesGuard)
+  @Roles([UserRolesEnum.admin])
   @Post()
   @ApiBody({
     description: 'subchapter',
@@ -84,6 +93,8 @@ export class SubChapterController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard, RolesGuard)
+  @Roles([UserRolesEnum.admin])
   @Put('/:subchapterId')
   @ApiParam({
     name: 'subchapterId',
@@ -114,6 +125,8 @@ export class SubChapterController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard, RolesGuard)
+  @Roles([UserRolesEnum.admin])
   @Delete('/:subchapterId')
   @ApiParam({
     name: 'subchapterId',

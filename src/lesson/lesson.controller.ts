@@ -11,6 +11,7 @@ import {
   Req,
   Res,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
@@ -23,6 +24,10 @@ import {
 import { LessonService } from './lesson.service';
 import { LessonCreateDTO } from './dto';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
+import { IsAuthenticatedGuard } from '../guards';
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { PrismaClient, UserRolesEnum } from '@prisma/client';
 
 @ApiTags('Lesson')
 @Controller({
@@ -36,6 +41,7 @@ export class LessonsController {
   ) {}
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard)
   @Get('/')
   async findAll(@Res() res: Response) {
     try {
@@ -50,6 +56,7 @@ export class LessonsController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard)
   @Get('/:lessonId')
   @ApiParam({
     name: 'lessonId',
@@ -70,6 +77,8 @@ export class LessonsController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard, RolesGuard)
+  @Roles([UserRolesEnum.admin])
   @Post('/')
   @ApiBody({
     description: 'lesson',
@@ -92,6 +101,8 @@ export class LessonsController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard, RolesGuard)
+  @Roles([UserRolesEnum.admin])
   @Put('/:lessonId')
   @ApiParam({
     name: 'lessonId',
@@ -120,6 +131,8 @@ export class LessonsController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard, RolesGuard)
+  @Roles([UserRolesEnum.admin])
   @Delete('/:lessonId')
   @ApiParam({
     name: 'lessonId',

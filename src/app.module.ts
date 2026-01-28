@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module'
+import { AuthModule } from './auth/auth.module';
 import { JwtConfigModule } from './jwt/jwt.module';
 import { LessonModule } from './lesson/lesson.module';
-import { ChapterModule } from './chapter/chapter.module'
+import { ChapterModule } from './chapter/chapter.module';
 
 @Module({
   imports: [
@@ -13,10 +13,10 @@ import { ChapterModule } from './chapter/chapter.module'
       isGlobal: true,
     }),
     JwtConfigModule,
-    PrismaModule, 
+    PrismaModule,
     AuthModule,
     LessonModule,
-    ChapterModule
+    ChapterModule,
   ],
 })
 export class AppModule {}

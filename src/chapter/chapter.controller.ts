@@ -21,6 +21,11 @@ import {
 import { ChapterService } from './chapter.service';
 import { ChapterCreateDTO } from './dto/chapter-create.dto';
 import { ChapterUpdateDTO } from './dto/chapter-update.dto';
+import { IsAuthenticatedGuard } from '../guards';
+import { UseGuards } from '@nestjs/common';
+import { Roles } from 'src/decorators/roles.decorator';
+import { PrismaClient, UserRolesEnum } from '@prisma/client';
+import { RolesGuard } from 'src/guards/roles.guard';
 
 @ApiTags('Chapter')
 @Controller({
@@ -31,6 +36,7 @@ export class ChapterController {
   constructor(private readonly chapterService: ChapterService) {}
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard)
   @Get('/')
   async findAll(@Res() res: Response) {
     try {
@@ -45,6 +51,7 @@ export class ChapterController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard)
   @Get('/:chapterId')
   @ApiParam({
     name: 'chapterId',
@@ -64,6 +71,8 @@ export class ChapterController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard)
+  @Roles([UserRolesEnum.admin])
   @Post()
   @ApiBody({
     description: 'chapter',
@@ -85,6 +94,8 @@ export class ChapterController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard, RolesGuard)
+  @Roles([UserRolesEnum.admin])
   @Put('/:chapterId')
   @ApiParam({
     name: 'chapterId',
@@ -112,6 +123,8 @@ export class ChapterController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard, RolesGuard)
+  @Roles([UserRolesEnum.admin])
   @Delete('/:chapterId')
   @ApiParam({
     name: 'chapterId',
