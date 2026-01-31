@@ -72,7 +72,7 @@ export class ChapterController {
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard)
-  @Roles([UserRolesEnum.admin])
+  @Roles(UserRolesEnum.admin)
   @Post()
   @ApiBody({
     description: 'chapter',
@@ -95,7 +95,7 @@ export class ChapterController {
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
-  @Roles([UserRolesEnum.admin])
+  @Roles(UserRolesEnum.admin)
   @Put('/:chapterId')
   @ApiParam({
     name: 'chapterId',
@@ -124,7 +124,7 @@ export class ChapterController {
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
-  @Roles([UserRolesEnum.admin])
+  @Roles(UserRolesEnum.admin)
   @Delete('/:chapterId')
   @ApiParam({
     name: 'chapterId',

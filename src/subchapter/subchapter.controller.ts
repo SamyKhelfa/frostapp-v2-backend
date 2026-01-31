@@ -71,7 +71,7 @@ export class SubChapterController {
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
-  @Roles([UserRolesEnum.admin])
+  @Roles(UserRolesEnum.admin)
   @Post()
   @ApiBody({
     description: 'subchapter',
@@ -94,7 +94,7 @@ export class SubChapterController {
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
-  @Roles([UserRolesEnum.admin])
+  @Roles(UserRolesEnum.admin)
   @Put('/:subchapterId')
   @ApiParam({
     name: 'subchapterId',
@@ -126,7 +126,7 @@ export class SubChapterController {
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
-  @Roles([UserRolesEnum.admin])
+  @Roles(UserRolesEnum.admin)
   @Delete('/:subchapterId')
   @ApiParam({
     name: 'subchapterId',

@@ -78,7 +78,7 @@ export class LessonsController {
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
-  @Roles([UserRolesEnum.admin])
+  @Roles(UserRolesEnum.admin)
   @Post('/')
   @ApiBody({
     description: 'lesson',
@@ -102,7 +102,7 @@ export class LessonsController {
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
-  @Roles([UserRolesEnum.admin])
+  @Roles(UserRolesEnum.admin)
   @Put('/:lessonId')
   @ApiParam({
     name: 'lessonId',
@@ -132,7 +132,7 @@ export class LessonsController {
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
-  @Roles([UserRolesEnum.admin])
+  @Roles(UserRolesEnum.admin)
   @Delete('/:lessonId')
   @ApiParam({
     name: 'lessonId',
