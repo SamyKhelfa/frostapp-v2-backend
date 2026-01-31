@@ -1,9 +1,8 @@
 import { ConfigService } from '@nestjs/config';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger, VersioningType } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { RolesGuard } from './guards/roles.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -12,10 +11,6 @@ async function bootstrap() {
       credentials: true,
     },
   });
-
-  const reflector = new Reflector();
-
-  app.useGlobalGuards(new RolesGuard(reflector));
 
   const configService: ConfigService = app.get(ConfigService);
 

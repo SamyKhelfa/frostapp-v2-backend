@@ -11,21 +11,15 @@ import {
   Delete,
 } from '@nestjs/common';
 import { Response } from 'express';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiParam,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ChapterService } from './chapter.service';
 import { ChapterCreateDTO } from './dto/chapter-create.dto';
 import { ChapterUpdateDTO } from './dto/chapter-update.dto';
 import { IsAuthenticatedGuard } from '../guards';
+import { RolesGuard } from '../guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/decorators/roles.decorator';
-import { PrismaClient, UserRolesEnum } from '@prisma/client';
-import { RolesGuard } from 'src/guards/roles.guard';
+import { UserRolesEnum } from '@prisma/client';
 
 @ApiTags('Chapter')
 @Controller({
@@ -71,8 +65,8 @@ export class ChapterController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(IsAuthenticatedGuard)
-  @Roles(UserRolesEnum.admin)
+  @UseGuards(IsAuthenticatedGuard, RolesGuard)
+  @Roles([UserRolesEnum.admin])
   @Post()
   @ApiBody({
     description: 'chapter',
@@ -95,7 +89,7 @@ export class ChapterController {
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
-  @Roles(UserRolesEnum.admin)
+  @Roles([UserRolesEnum.admin])
   @Put('/:chapterId')
   @ApiParam({
     name: 'chapterId',
@@ -124,7 +118,7 @@ export class ChapterController {
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
-  @Roles(UserRolesEnum.admin)
+  @Roles([UserRolesEnum.admin])
   @Delete('/:chapterId')
   @ApiParam({
     name: 'chapterId',
