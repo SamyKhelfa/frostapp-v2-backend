@@ -1,19 +1,17 @@
 import {
   Body,
   Controller,
-  Get,
   HttpException,
   HttpStatus,
   Inject,
   Post,
-  Req,
   Res,
 } from '@nestjs/common';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { RegisterDTO } from './dto/register.dto';
-import { AuthService } from './auth.service';
+import { AUTH_SERVICE_TOKEN, IAuthServiceContract } from './contracts';
 import { LoginDTO } from './dto';
+import { RegisterDTO } from './dto/register.dto';
 
 @ApiTags('Authentication')
 @Controller({
@@ -22,8 +20,8 @@ import { LoginDTO } from './dto';
 })
 export class AuthController {
   constructor(
-    @Inject(AuthService)
-    private readonly authService: AuthService,
+    @Inject(AUTH_SERVICE_TOKEN)
+    private readonly authService: IAuthServiceContract,
   ) {}
 
   @Post('/login')

@@ -5,21 +5,22 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Inject,
   Post,
   Put,
   Res,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { ChapterService } from './chapter.service';
 import { ChapterCreateDTO } from './dto/chapter-create.dto';
 import { ChapterUpdateDTO } from './dto/chapter-update.dto';
 import { IsAuthenticatedGuard } from '../guards';
 import { RolesGuard } from '../guards/roles.guard';
-import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRolesEnum } from '@prisma/client';
+import { CHAPTER_SERVICE_TOKEN, IChapterServiceContract } from './contracts';
 
 @ApiTags('Chapter')
 @Controller({
@@ -27,7 +28,10 @@ import { UserRolesEnum } from '@prisma/client';
   version: '1',
 })
 export class ChapterController {
-  constructor(private readonly chapterService: ChapterService) {}
+  constructor(
+    @Inject(CHAPTER_SERVICE_TOKEN)
+    private readonly chapterService: IChapterServiceContract,
+  ) {}
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard)

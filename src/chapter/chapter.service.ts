@@ -1,12 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChapterCreateDTO } from './dto/chapter-create.dto';
-import { getConnectIds } from 'src/utils';
 import { Chapter } from '@prisma/client';
 import { ChapterUpdateDTO } from './dto/chapter-update.dto';
+import { IChapterServiceContract } from './contracts';
 
 @Injectable()
-export class ChapterService {
+export class ChapterService implements IChapterServiceContract {
   constructor(private prisma: PrismaService) {}
 
   private includeData = {

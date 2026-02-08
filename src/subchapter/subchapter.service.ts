@@ -1,12 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SubChapterCreateDTO } from './dto/subchapter-create.dto';
-import { getConnectIds } from 'src/utils';
-import { Prisma, SubChapter } from '@prisma/client';
+import { SubChapter } from '@prisma/client';
 import { SubChapterUpdateDTO } from './dto/subchapter-update.dto';
+import { ISubChapterServiceContract } from './contracts';
 
 @Injectable()
-export class SubChapterService {
+export class SubChapterService implements ISubChapterServiceContract {
   constructor(private prisma: PrismaService) {}
 
   private includeData = {

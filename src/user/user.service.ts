@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { IUserServiceContract } from './contracts';
 
 @Injectable()
-export class UserService {
+export class UserService implements IUserServiceContract {
   constructor(private prisma: PrismaService) {}
 
   findUserById(userId: number): Promise<User | null> {

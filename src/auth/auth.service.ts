@@ -1,13 +1,14 @@
-import { JwtService } from '@nestjs/jwt';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { RegisterDTO, LoginDTO } from './dto';
-import { IRegisterResponse, ILoginResponse } from './responses';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+import { IAuthServiceContract } from './contracts';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { LoginDTO, RegisterDTO } from './dto';
+import { ILoginResponse, IRegisterResponse } from './responses';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthServiceContract {
   constructor(
     @Inject(PrismaService)
     private prisma: PrismaService,

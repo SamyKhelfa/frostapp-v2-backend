@@ -1,16 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LessonCreateDTO } from './dto';
 import { getConnectIds } from '../utils';
 import { Lesson } from '@prisma/client';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
+import { ILessonServiceContract } from './contracts';
 
 @Injectable()
-export class LessonService {
-  constructor(
-    @Inject(PrismaService)
-    private prisma: PrismaService,
-  ) {}
+export class LessonService implements ILessonServiceContract {
+  constructor(private prisma: PrismaService) {}
 
   private includeData = {
     chapters: true,

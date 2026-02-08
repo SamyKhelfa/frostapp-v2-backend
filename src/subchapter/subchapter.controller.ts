@@ -1,25 +1,29 @@
 import {
   Body,
-  Param,
   Controller,
+  Delete,
   Get,
   HttpException,
+  HttpStatus,
+  Inject,
+  Param,
   Post,
   Put,
   Res,
-  Delete,
-  HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { SubChapterCreateDTO } from './dto/subchapter-create.dto';
-import { SubChapterUpdateDTO } from './dto/subchapter-update.dto';
-import { SubChapterService } from './subchapter.service';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { UserRolesEnum } from '@prisma/client';
+import { Response } from 'express';
+import { Roles } from 'src/decorators/roles.decorator';
 import { IsAuthenticatedGuard } from '../guards';
 import { RolesGuard } from '../guards/roles.guard';
-import { Roles } from 'src/decorators/roles.decorator';
-import { UserRolesEnum } from '@prisma/client';
+import {
+  ISubChapterServiceContract,
+  SUBCHAPTER_SERVICE_TOKEN,
+} from './contracts';
+import { SubChapterCreateDTO } from './dto/subchapter-create.dto';
+import { SubChapterUpdateDTO } from './dto/subchapter-update.dto';
 
 @ApiTags('SubChapter')
 @Controller({
@@ -27,7 +31,10 @@ import { UserRolesEnum } from '@prisma/client';
   version: '1',
 })
 export class SubChapterController {
-  constructor(private readonly subChapterService: SubChapterService) {}
+  constructor(
+    @Inject(SUBCHAPTER_SERVICE_TOKEN)
+    private readonly subChapterService: ISubChapterServiceContract,
+  ) {}
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard)

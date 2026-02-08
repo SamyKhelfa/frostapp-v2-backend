@@ -20,7 +20,7 @@ import { RolesGuard } from 'src/guards/roles.guard';
 import { IsAuthenticatedGuard } from '../guards';
 import { LessonCreateDTO } from './dto';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
-import { LessonService } from './lesson.service';
+import { LESSON_SERVICE_TOKEN, ILessonServiceContract } from './contracts';
 
 @ApiTags('Lesson')
 @Controller({
@@ -29,8 +29,8 @@ import { LessonService } from './lesson.service';
 })
 export class LessonsController {
   constructor(
-    @Inject(LessonService)
-    private readonly lessonService: LessonService,
+    @Inject(LESSON_SERVICE_TOKEN)
+    private readonly lessonService: ILessonServiceContract,
   ) {}
 
   @ApiBearerAuth()
