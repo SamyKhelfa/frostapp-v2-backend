@@ -1,0 +1,106 @@
+================================================================================
+RAPPEL : INJECTION DE DÉPENDANCE AVEC CONTRATS (NestJS)
+================================================================================
+Doc de référence pour retrouver rapidement comment les contrats sont utilisés
+dans le projet.
+
+
+1. IDÉE GÉNÉRALE
+----------------
+- On n'injecte pas la classe du service (ex. AuthService) mais un "contrat"
+  (interface + token).
+- Le module décide quelle classe est fournie quand on demande le contrat.
+- Avantage : on peut changer d'implémentation (ex. mock en test) sans modifier
+  les contrôleurs.
+
+
+2. POURQUOI UN TOKEN EN PLUS DE L'INTERFACE ?
+----------------------------------------------
+En TypeScript, les interfaces n'existent pas au runtime. Nest a besoin d'une
+valeur (string ou symbol) pour enregistrer et retrouver le provider. D'où :
+  - TOKEN : utilisé au runtime (provide, @Inject).
+  - INTERFACE : utilisée pour le typage (TypeScript) et la doc (JSDoc).
+
+
+3. OÙ SONT LES CONTRATS ?
+-------------------------
+Dans chaque module, dossier contracts/ :
+
+  src/auth/contracts/         → AUTH_SERVICE_TOKEN, IAuthServiceContract
+  src/user/contracts/         → USER_SERVICE_TOKEN, IUserServiceContract
+  src/chapter/contracts/      → CHAPTER_SERVICE_TOKEN, IChapterServiceContract
+  src/lesson/contracts/       → LESSON_SERVICE_TOKEN, ILessonServiceContract
+  src/subchapter/contracts/   → SUBCHAPTER_SERVICE_TOKEN, ISubChapterServiceContract
+
+Chaque dossier contient :
+  - <domaine>-service.contract.ts  (token + interface + JSDoc)
+  - index.ts                        (export token et interface)
+
+
+4. DÉFINIR UN CONTRAT (ex. auth)
+--------------------------------
+Dans auth/contracts/auth-service.contract.ts :
+
+  export const AUTH_SERVICE_TOKEN = 'AUTH_SERVICE';
+
+  export interface IAuthServiceContract {
+    login(dto: LoginDTO): Promise<ILoginResponse>;
+    register(dto: RegisterDTO): Promise<IRegisterResponse>;
+  }
+
+Dans auth/contracts/index.ts : réexporter token et interface.
+
+
+5. IMPLÉMENTER LE CONTRAT (service)
+-----------------------------------
+  class AuthService implements IAuthServiceContract { ... }
+
+  - implements (pas extends), pas de super().
+
+
+6. ENREGISTRER DANS LE MODULE
+-----------------------------
+  providers: [{ provide: AUTH_SERVICE_TOKEN, useClass: AuthService }]
+
+  - Un seul provider suffit : Nest instancie AuthService quand on demande
+    AUTH_SERVICE_TOKEN.
+  - Si le module est importé ailleurs (ex. User pour les guards), exporter
+    le token : exports: [USER_SERVICE_TOKEN].
+
+
+7. INJECTER DANS UN CONTRÔLEUR OU UN GUARD
+------------------------------------------
+  constructor(
+    @Inject(AUTH_SERVICE_TOKEN)
+    private readonly authService: IAuthServiceContract,
+  ) {}
+
+  - @Inject(TOKEN) : ce que Nest résout au runtime.
+  - IAuthServiceContract : type TypeScript (autocomplétion, vérification).
+
+  Pour injecter le contrat d'un autre module (ex. guard qui utilise User) :
+  import { USER_SERVICE_TOKEN, IUserServiceContract } from 'src/user/contracts';
+
+
+8. RÉCAP : QUI FAIT QUOI
+------------------------
+  Module      : provide: TOKEN, useClass: Service
+  Controller  : @Inject(TOKEN) ... IContract
+  Service     : implements IContract
+
+
+9. AJOUTER UN MOCK (ex. tests)
+------------------------------
+  1. Créer une classe qui implémente l'interface (méthodes avec données factices).
+  2. Dans le module (ou module de test) : { provide: TOKEN, useClass: MonMock }
+  Les contrôleurs ne changent pas.
+
+
+10. EN CAS D'ERREUR "Nest can't resolve dependencies..."
+--------------------------------------------------------
+  - Vérifier que le token est bien dans providers du module (ou exporté
+    par un module importé).
+  - Vérifier que @Inject(TOKEN) utilise exactement le même token que
+    provide: TOKEN dans le module.
+
+================================================================================
