@@ -5,9 +5,10 @@ import { RegisterDTO, LoginDTO } from './dto';
 import { IRegisterResponse, ILoginResponse } from './responses';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
+import { AuthServiceContract } from './contracts';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements AuthServiceContract {
   constructor(
     @Inject(PrismaService)
     private prisma: PrismaService,

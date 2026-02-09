@@ -14,6 +14,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RegisterDTO } from './dto/register.dto';
 import { AuthService } from './auth.service';
 import { LoginDTO } from './dto';
+import { AUTH_SERVICE_TOKEN, AuthServiceContract } from './contracts';
 
 @ApiTags('Authentication')
 @Controller({
@@ -22,8 +23,8 @@ import { LoginDTO } from './dto';
 })
 export class AuthController {
   constructor(
-    @Inject(AuthService)
-    private readonly authService: AuthService,
+    @Inject(AUTH_SERVICE_TOKEN)
+    private readonly authService: AuthServiceContract,
   ) {}
 
   @Post('/login')
