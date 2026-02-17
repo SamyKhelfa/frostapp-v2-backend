@@ -4,10 +4,14 @@ import { SubChapterCreateDTO } from './dto/subchapter-create.dto';
 import { getConnectIds } from 'src/utils';
 import { Prisma, SubChapter } from '@prisma/client';
 import { SubChapterUpdateDTO } from './dto/subchapter-update.dto';
+import { SubChapterServiceContract } from './contracts';
 
 @Injectable()
-export class SubChapterService {
-  constructor(private prisma: PrismaService) {}
+export class SubChapterService implements SubChapterServiceContract {
+  constructor(
+    @Inject(PrismaService)
+    private prisma: PrismaService,
+  ) {}
 
   private includeData = {
     Chapter: {

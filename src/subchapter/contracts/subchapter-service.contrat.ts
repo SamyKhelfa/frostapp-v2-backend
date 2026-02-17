@@ -2,6 +2,8 @@ import { SubChapter } from '@prisma/client';
 import { SubChapterCreateDTO } from '../dto/subchapter-create.dto';
 import { SubChapterUpdateDTO } from '../dto/subchapter-update.dto';
 
+export const SUBCHAPTER_SERVICE_TOKEN = 'SUBCHAPTER_SERVICE';
+
 export interface SubChapterServiceContract {
   findAll(): Promise<SubChapter[]>;
   findOne(id: number): Promise<SubChapter>;

@@ -3,6 +3,8 @@ import { Chapter } from '@prisma/client';
 import { ChapterCreateDTO } from 'src/chapter/dto/chapter-create.dto';
 import { ChapterUpdateDTO } from 'src/chapter/dto/chapter-update.dto';
 
+export const CHAPTER_SERVICE_TOKEN = 'CHAPTER_SERVICE';
+
 export interface ChapterServiceContract {
   findAll(): Promise<Chapter[]>;
   findOne(id: number): Promise<Chapter>;

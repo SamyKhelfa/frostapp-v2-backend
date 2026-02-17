@@ -8,9 +8,14 @@ import { IsAuthenticatedGuard } from '../guards';
 import { RolesGuard } from '../guards/roles.guard';
 import { ChapterController } from './chapter.controller';
 import { ChapterService } from './chapter.service';
+import { CHAPTER_SERVICE_TOKEN } from './contracts';
 
 @Module({
   controllers: [ChapterController],
-  providers: [ChapterService, IsAuthenticatedGuard, RolesGuard],
+  providers: [
+    IsAuthenticatedGuard,
+    RolesGuard,
+    { provide: CHAPTER_SERVICE_TOKEN, useClass: ChapterService },
+  ],
 })
 export class ChapterModule {}

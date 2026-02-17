@@ -4,9 +4,10 @@ import { LessonCreateDTO } from './dto';
 import { getConnectIds } from '../utils';
 import { Lesson } from '@prisma/client';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
+import { LessonServiceContract } from './contracts';
 
 @Injectable()
-export class LessonService {
+export class LessonService implements LessonServiceContract {
   constructor(
     @Inject(PrismaService)
     private prisma: PrismaService,

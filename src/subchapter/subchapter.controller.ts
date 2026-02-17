@@ -10,6 +10,7 @@ import {
   Delete,
   HttpStatus,
   UseGuards,
+  Inject,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { SubChapterCreateDTO } from './dto/subchapter-create.dto';
@@ -20,6 +21,10 @@ import { IsAuthenticatedGuard } from '../guards';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRolesEnum } from '@prisma/client';
+import {
+  SUBCHAPTER_SERVICE_TOKEN,
+  SubChapterServiceContract,
+} from './contracts';
 
 @ApiTags('SubChapter')
 @Controller({
@@ -27,7 +32,10 @@ import { UserRolesEnum } from '@prisma/client';
   version: '1',
 })
 export class SubChapterController {
-  constructor(private readonly subChapterService: SubChapterService) {}
+  constructor(
+    @Inject(SUBCHAPTER_SERVICE_TOKEN)
+    private readonly subChapterService: SubChapterServiceContract,
+  ) {}
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard)

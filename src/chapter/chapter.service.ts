@@ -4,10 +4,14 @@ import { ChapterCreateDTO } from './dto/chapter-create.dto';
 import { getConnectIds } from 'src/utils';
 import { Chapter } from '@prisma/client';
 import { ChapterUpdateDTO } from './dto/chapter-update.dto';
+import { ChapterServiceContract } from './contracts';
 
 @Injectable()
-export class ChapterService {
-  constructor(private prisma: PrismaService) {}
+export class ChapterService implements ChapterServiceContract {
+  constructor(
+    @Inject(PrismaService)
+    private prisma: PrismaService,
+  ) {}
 
   private includeData = {
     Lesson: {
