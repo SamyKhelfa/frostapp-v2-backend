@@ -8,13 +8,14 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { RegisterDTO } from './dto/register.dto';
-import { AuthService } from './auth.service';
 import { LoginDTO } from './dto';
 import { AUTH_SERVICE_TOKEN, AuthServiceContract } from './contracts';
+import { IsAuthenticatedGuard } from '../guards';
 
 @ApiTags('Authentication')
 @Controller({
@@ -26,6 +27,13 @@ export class AuthController {
     @Inject(AUTH_SERVICE_TOKEN)
     private readonly authService: AuthServiceContract,
   ) {}
+
+  @Get('/me')
+  @UseGuards(IsAuthenticatedGuard)
+  @ApiBearerAuth()
+  me(@Req() req: { user: unknown }) {
+    return req.user;
+  }
 
   @Post('/login')
   @ApiBody({
