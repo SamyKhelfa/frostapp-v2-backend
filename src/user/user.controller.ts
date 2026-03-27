@@ -7,10 +7,17 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UserRolesEnum } from '@prisma/client';
 import { Response } from 'express';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -30,11 +37,38 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
   @Roles([UserRolesEnum.admin])
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
+  @ApiQuery({
+    name: 'enablePagination',
+    required: false,
+    example: true,
+    description: 'false returns all users without skip/take',
+  })
   @Get('/')
-  async findAll(@Res() res: Response) {
+  async findAll(
+    @Query('page') pageStr: string | undefined,
+    @Query('limit') limitStr: string | undefined,
+    @Query('enablePagination') enablePaginationStr: string | undefined,
+    @Res() res: Response,
+  ) {
     try {
-      const users = await this.userService.findAllSafe();
-      return res.status(HttpStatus.OK).send(users);
+      const page = Math.max(1, parseInt(pageStr ?? '1', 10) || 1);
+      const limit = Math.min(
+        100,
+        Math.max(1, parseInt(limitStr ?? '10', 10) || 10),
+      );
+      const enablePagination = !['false', '0'].includes(
+        String(enablePaginationStr ?? 'true').toLowerCase(),
+      );
+
+      const result = await this.userService.findAllSafePaginated({
+        page,
+        limit,
+        enablePagination,
+      });
+
+      return res.status(HttpStatus.OK).send(result);
     } catch (error) {
       throw new HttpException(
         error.message,

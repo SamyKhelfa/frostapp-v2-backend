@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
+import {
+  PaginatedResult,
+  PaginationParams,
+} from 'src/common/interfaces/pagination.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 const userPublicSelect = {
@@ -33,6 +37,45 @@ export class UserService {
       orderBy: { id: 'asc' },
       select: userPublicSelect,
     });
+  }
+
+  async findAllSafePaginated(
+    params: PaginationParams,
+  ): Promise<PaginatedResult<UserPublic>> {
+    const { page, limit, enablePagination } = params;
+
+    if (!enablePagination) {
+      const data = await this.prisma.user.findMany({
+        orderBy: { id: 'asc' },
+        select: userPublicSelect,
+      });
+      return {
+        data,
+        total: data.length,
+        page: 1,
+        limit: data.length,
+        enablePagination: false,
+      };
+    }
+
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.user.findMany({
+        orderBy: { id: 'asc' },
+        select: userPublicSelect,
+        skip,
+        take: limit,
+      }),
+      this.prisma.user.count(),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      enablePagination: true,
+    };
   }
 
   findByIdSafe(id: number): Promise<UserPublic | null> {
