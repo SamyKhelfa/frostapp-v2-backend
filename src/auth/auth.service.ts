@@ -63,6 +63,14 @@ export class AuthService implements AuthServiceContract {
   async register(dto: RegisterDTO): Promise<IRegisterResponse> {
     const { password, name, email } = dto;
 
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new HttpException('Email already in use', HttpStatus.CONFLICT);
+    }
+
     const salt = bcrypt.genSaltSync(10);
     const hashPassword = bcrypt.hashSync(password, salt);
 
