@@ -5,6 +5,9 @@ import { getConnectIds } from '../utils';
 import { Lesson } from '@prisma/client';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
 import { LessonServiceContract } from './contracts';
+import { PaginatedResult,
+        PaginationParams,
+} from 'src/common/interfaces/pagination.interface'
 
 @Injectable()
 export class LessonService implements LessonServiceContract {
@@ -22,6 +25,43 @@ export class LessonService implements LessonServiceContract {
       },
     },
   };
+
+  async findAllSafePaginated(
+    params: PaginationParams,
+  ): Promise<PaginatedResult<Lesson>> {
+    const { page, limit, enablePagination } = params;
+
+    if(!enablePagination) {
+      const data = await this.prisma.lesson.findMany({
+        orderBy: { id: 'asc' },
+      });
+      return {
+        data,
+        total: data.length,
+        page: 1,
+        limit: data.length,
+        enablePagination: false,
+      };
+    }
+
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.lesson.findMany({
+        orderBy: { id: 'asc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.lesson.count(),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      enablePagination: true,
+    };
+  }
 
   async findAll(): Promise<Lesson[]> {
     return this.prisma.lesson.findMany({

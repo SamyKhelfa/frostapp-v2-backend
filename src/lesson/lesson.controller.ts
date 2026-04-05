@@ -8,7 +8,7 @@ import {
   Inject,
   Param,
   Post,
-  Put,
+  Put, Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -36,11 +36,29 @@ export class LessonsController {
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard)
   @Get('/')
-  async findAll(@Res() res: Response) {
+  async findAll(
+    @Query('page') pageStr: string | undefined,
+    @Query('limit') limitStr: string | undefined,
+    @Query('unablePagination') enablePaginationStr: string | undefined,
+    @Res() res: Response,
+  ) {
     try {
-      const lessons = await this.lessonService.findAll();
-      return res.status(HttpStatus.OK).send(lessons);
-    } catch (error) {
+      const page = Math.max(1, parseInt(pageStr ?? '1', 10) || 1)
+      const limit = Math.min(
+        100,
+        Math.max(1, parseInt(limitStr ?? '10', 10) || 10),
+        )
+      const enablePagination = !['false', '0'].includes(
+        String(enablePaginationStr ?? 'true').toLowerCase(),
+      )
+      const result = await this.lessonService.findAllSafePaginated({
+        page,
+        limit,
+        enablePagination,
+      });
+      return res.status(HttpStatus.OK).send(result)
+    }
+       catch (error) {
       throw new HttpException(
         error.message,
         error?.status || HttpStatus.BAD_REQUEST,
