@@ -1,10 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { ChapterCreateDTO } from './dto/chapter-create.dto';
-import { getConnectIds } from 'src/utils';
 import { Chapter } from '@prisma/client';
-import { ChapterUpdateDTO } from './dto/chapter-update.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import {
+  PaginatedResult,
+  PaginationParams,
+} from '../common/interfaces/pagination.interface';
 import { ChapterServiceContract } from './contracts';
+import { ChapterCreateDTO } from './dto/chapter-create.dto';
+import { ChapterUpdateDTO } from './dto/chapter-update.dto';
 
 @Injectable()
 export class ChapterService implements ChapterServiceContract {
@@ -22,11 +25,48 @@ export class ChapterService implements ChapterServiceContract {
     },
   };
 
+  async findAllSafePaginated(
+    params: PaginationParams,
+  ): Promise<PaginatedResult<Chapter>> {
+    const { page, limit, enablePagination } = params;
+
+    if (!enablePagination) {
+      const data = await this.prisma.chapter.findMany({
+        orderBy: { id: 'asc' },
+      });
+      return {
+        data,
+        total: data.length,
+        page: 1,
+        limit: data.length,
+        enablePagination: false,
+      };
+    }
+
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.chapter.findMany({
+        orderBy: { id: 'asc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.chapter.count(),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      enablePagination: true,
+    };
+  }
+
   async findAll(): Promise<Chapter[]> {
     return this.prisma.chapter.findMany();
   }
 
-  async findOne(id: number): Promise<Chapter> {
+  async findById(id: number): Promise<Chapter> {
     return this.prisma.chapter.findUnique({
       where: { id },
     });
