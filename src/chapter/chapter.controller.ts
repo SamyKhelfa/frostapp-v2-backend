@@ -10,6 +10,7 @@ import {
   Res,
   Delete,
   Inject,
+  Query
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
@@ -37,11 +38,28 @@ export class ChapterController {
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard)
   @Get('/')
-  async findAll(@Res() res: Response) {
-    try {
-      const chapters = await this.chapterService.findAll();
-      return res.status(HttpStatus.OK).send(chapters);
-    } catch (error) {
+  async findAll(
+    @Query('page') pageStr: string | undefined,
+    @Query('limit') limitStr: string | undefined,
+    @Query('enablePagination') enablePaginationStr: string | undefined,
+    @Res() res: Response,
+  ) {
+    const page = Math.max(1, parseInt(pageStr ?? '1', 10) || 1)
+    const limit = Math.min(
+      100,
+      Math.max(1, parseInt(limitStr ?? '10', 10) || 10),
+    )
+    const enablePagination = !['false', '0'].includes(
+      String(enablePaginationStr ?? 'true').toLowerCase(),
+    )
+    const result = await this.chapterService.findAllSafePaginated({
+      page,
+      limit,
+      enablePagination,
+    });
+    return res.status(HttpStatus.OK).send(result)
+  }
+  catch (error) {
       throw new HttpException(
         error.message,
         error?.status || HttpStatus.BAD_REQUEST,
@@ -57,6 +75,7 @@ export class ChapterController {
     example: 1,
     description: 'The id of the chapter',
   })
+
   async findById(@Param('chapterId') chapterId: string, @Res() res: Response) {
     try {
       const chapter = await this.chapterService.findOne(Number(chapterId));
@@ -77,6 +96,7 @@ export class ChapterController {
     description: 'chapter',
     type: ChapterCreateDTO,
   })
+
   async create(
     @Body() body: ChapterCreateDTO,
     @Res() res: Response,
@@ -130,6 +150,7 @@ export class ChapterController {
     example: 1,
     description: 'The id of the chapter',
   })
+
   async delete(
     @Param('chapterId') chapterId: string,
     @Res() res: Response,

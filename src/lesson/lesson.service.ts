@@ -5,8 +5,7 @@ import { getConnectIds } from '../utils';
 import { Lesson } from '@prisma/client';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
 import { LessonServiceContract } from './contracts';
-import { PaginatedResult,
-        PaginationParams,
+import {PaginatedResult,PaginationParams,
 } from 'src/common/interfaces/pagination.interface'
 
 @Injectable()

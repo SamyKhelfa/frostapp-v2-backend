@@ -5,6 +5,10 @@ import { getConnectIds } from 'src/utils';
 import { Chapter } from '@prisma/client';
 import { ChapterUpdateDTO } from './dto/chapter-update.dto';
 import { ChapterServiceContract } from './contracts';
+import {
+  PaginatedResult,
+  PaginationParams,
+} from '../common/interfaces/pagination.interface';
 
 @Injectable()
 export class ChapterService implements ChapterServiceContract {
@@ -21,6 +25,43 @@ export class ChapterService implements ChapterServiceContract {
       },
     },
   };
+
+  async findAllSafePaginated(
+    params: PaginationParams,
+  ): Promise<PaginatedResult<Chapter>> {
+    const { page, limit, enablePagination } = params;
+
+    if (!enablePagination) {
+      const data = await this.prisma.chapter.findMany({
+        orderBy: { id: 'asc' },
+      });
+      return {
+        data,
+        total: data.length,
+        page: 1,
+        limit: data.length,
+        enablePagination: false,
+      };
+    }
+
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.chapter.findMany({
+        orderBy: { id: 'asc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.chapter.count(),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      enablePagination: true,
+    };
+  }
 
   async findAll(): Promise<Chapter[]> {
     return this.prisma.chapter.findMany();
