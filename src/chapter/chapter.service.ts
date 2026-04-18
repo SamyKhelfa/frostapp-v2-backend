@@ -1,14 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { ChapterCreateDTO } from './dto/chapter-create.dto';
-import { getConnectIds } from 'src/utils';
 import { Chapter } from '@prisma/client';
-import { ChapterUpdateDTO } from './dto/chapter-update.dto';
-import { ChapterServiceContract } from './contracts';
+import { PrismaService } from 'src/prisma/prisma.service';
 import {
   PaginatedResult,
   PaginationParams,
 } from '../common/interfaces/pagination.interface';
+import { ChapterServiceContract } from './contracts';
+import { ChapterCreateDTO } from './dto/chapter-create.dto';
+import { ChapterUpdateDTO } from './dto/chapter-update.dto';
 
 @Injectable()
 export class ChapterService implements ChapterServiceContract {
@@ -67,7 +66,7 @@ export class ChapterService implements ChapterServiceContract {
     return this.prisma.chapter.findMany();
   }
 
-  async findOne(id: number): Promise<Chapter> {
+  async findById(id: number): Promise<Chapter> {
     return this.prisma.chapter.findUnique({
       where: { id },
     });

@@ -1,28 +1,27 @@
 import {
   Body,
-  Param,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
+  Inject,
+  Param,
   Post,
   Put,
+  Query,
   Res,
-  Delete,
-  Inject,
-  Query
+  UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { ChapterService } from './chapter.service';
+import { UserRolesEnum } from '@prisma/client';
+import { Response } from 'express';
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { IsAuthenticatedGuard } from '../guards';
+import { CHAPTER_SERVICE_TOKEN, ChapterServiceContract } from './contracts';
 import { ChapterCreateDTO } from './dto/chapter-create.dto';
 import { ChapterUpdateDTO } from './dto/chapter-update.dto';
-import { IsAuthenticatedGuard } from '../guards';
-import { RolesGuard } from '../guards/roles.guard';
-import { UseGuards } from '@nestjs/common';
-import { Roles } from 'src/decorators/roles.decorator';
-import { UserRolesEnum } from '@prisma/client';
-import { CHAPTER_SERVICE_TOKEN, ChapterServiceContract } from './contracts';
 
 @ApiTags('Chapter')
 @Controller({
@@ -41,25 +40,25 @@ export class ChapterController {
   async findAll(
     @Query('page') pageStr: string | undefined,
     @Query('limit') limitStr: string | undefined,
-    @Query('enablePagination') enablePaginationStr: string | undefined,
+    @Query('unablePagination') enablePaginationStr: string | undefined,
     @Res() res: Response,
   ) {
-    const page = Math.max(1, parseInt(pageStr ?? '1', 10) || 1)
-    const limit = Math.min(
-      100,
-      Math.max(1, parseInt(limitStr ?? '10', 10) || 10),
-    )
-    const enablePagination = !['false', '0'].includes(
-      String(enablePaginationStr ?? 'true').toLowerCase(),
-    )
-    const result = await this.chapterService.findAllSafePaginated({
-      page,
-      limit,
-      enablePagination,
-    });
-    return res.status(HttpStatus.OK).send(result)
-  }
-  catch (error) {
+    try {
+      const page = Math.max(1, parseInt(pageStr ?? '1', 10) || 1);
+      const limit = Math.min(
+        100,
+        Math.max(1, parseInt(limitStr ?? '10', 10) || 10),
+      );
+      const enablePagination = !['false', '0'].includes(
+        String(enablePaginationStr ?? 'true').toLowerCase(),
+      );
+      const result = await this.chapterService.findAllSafePaginated({
+        page,
+        limit,
+        enablePagination,
+      });
+      return res.status(HttpStatus.OK).send(result);
+    } catch (error) {
       throw new HttpException(
         error.message,
         error?.status || HttpStatus.BAD_REQUEST,
@@ -75,10 +74,10 @@ export class ChapterController {
     example: 1,
     description: 'The id of the chapter',
   })
-
   async findById(@Param('chapterId') chapterId: string, @Res() res: Response) {
     try {
-      const chapter = await this.chapterService.findOne(Number(chapterId));
+      const chapter = await this.chapterService.findById(Number(chapterId));
+
       return res.status(HttpStatus.OK).send(chapter);
     } catch (error) {
       throw new HttpException(
@@ -91,19 +90,19 @@ export class ChapterController {
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
   @Roles([UserRolesEnum.admin])
-  @Post()
+  @Post('/')
   @ApiBody({
     description: 'chapter',
     type: ChapterCreateDTO,
   })
-
   async create(
     @Body() body: ChapterCreateDTO,
     @Res() res: Response,
   ): Promise<Response> {
     try {
       const chapter = await this.chapterService.create(body);
-      return res.status(HttpStatus.CREATED).json(chapter);
+
+      return res.status(HttpStatus.CREATED).send(chapter);
     } catch (error) {
       throw new HttpException(
         error.message,
@@ -132,6 +131,7 @@ export class ChapterController {
   ): Promise<Response> {
     try {
       const chapter = await this.chapterService.update(Number(chapterId), dto);
+
       return res.status(HttpStatus.OK).send(chapter);
     } catch (error) {
       throw new HttpException(
@@ -150,13 +150,11 @@ export class ChapterController {
     example: 1,
     description: 'The id of the chapter',
   })
-
   async delete(
     @Param('chapterId') chapterId: string,
     @Res() res: Response,
   ): Promise<Response> {
     try {
-      console.log(chapterId);
       await this.chapterService.delete(Number(chapterId));
 
       return res.status(HttpStatus.NO_CONTENT).send();
