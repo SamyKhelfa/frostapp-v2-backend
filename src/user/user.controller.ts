@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Patch,
   Query,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -25,6 +26,8 @@ import { IsAuthenticatedGuard } from 'src/guards';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { SetUserActiveDTO } from './dto/set-user-active.dto';
 import { UserService } from './user.service';
+import { UpdateMeDTO } from './dto/update-me.dto';
+import { ChangePasswordDTO } from './dto/change-password.dto';
 
 @ApiTags('User')
 @Controller({
@@ -69,6 +72,70 @@ export class UserController {
       });
 
       return res.status(HttpStatus.OK).send(result);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard)
+  @Get('me')
+  async getMe(@Req() req: any, @Res() res: Response) {
+    try {
+      const user = await this.userService.findByIdSafe(req.user.id);
+      if (!user) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send({ message: 'User not found' });
+      }
+      return res.status(HttpStatus.OK).send(user);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard)
+  @Patch('me')
+  @ApiBody({ type: UpdateMeDTO })
+  async updateMe(
+    @Req() req: any,
+    @Body() body: UpdateMeDTO,
+    @Res() res: Response,
+  ) {
+    try {
+      const user = await this.userService.updateMe(req.user.id, body);
+      return res.status(HttpStatus.OK).send(user);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard)
+  @Patch('me/password')
+  @ApiBody({ type: ChangePasswordDTO })
+  async changePassword(
+    @Req() req: any,
+    @Body() body: ChangePasswordDTO,
+    @Res() res: Response,
+  ) {
+    try {
+      await this.userService.changePassword(
+        req.user.id,
+        body.currentPassword,
+        body.newPassword,
+      );
+      return res.status(HttpStatus.OK).send({ success: true });
     } catch (error) {
       throw new HttpException(
         error.message,
@@ -126,3 +193,10 @@ export class UserController {
     }
   }
 }
+
+
+
+
+
+
+

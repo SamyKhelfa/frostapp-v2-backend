@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import {
   PaginatedResult,
   PaginationParams,
 } from 'src/common/interfaces/pagination.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
 
 const userPublicSelect = {
   id: true,
@@ -14,6 +15,7 @@ const userPublicSelect = {
   active: true,
   createdAt: true,
   updatedAt: true,
+  avatar: true,
 } as const;
 
 export type UserPublic = Omit<User, 'password'>;
@@ -98,4 +100,64 @@ export class UserService {
       select: userPublicSelect,
     });
   }
+
+  async updateMe(
+    userId: number,
+    data: { name?: string; email?: string; avatar?: string },
+  ): Promise<UserPublic> {
+    if (data.email) {
+      const existing = await this.prisma.user.findUnique({
+        where: { email: data.email },
+      });
+      if (existing && existing.id !== userId) {
+        throw new HttpException('Email already in use', HttpStatus.CONFLICT);
+      }
+    }
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+      select: userPublicSelect,
+    });
+  }
+
+  async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const isCorrect = bcrypt.compareSync(currentPassword, user.password);
+    if (!isCorrect) {
+      throw new HttpException(
+        'Current password is incorrect',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const isSameAsOld = bcrypt.compareSync(newPassword, user.password);
+    if (isSameAsOld) {
+      throw new HttpException(
+        'New password must be different from the current one',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const hashed = bcrypt.hashSync(newPassword, salt);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashed },
+    });
+  }
 }
+
+
+
+
