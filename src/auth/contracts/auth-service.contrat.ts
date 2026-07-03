@@ -22,4 +22,13 @@ export interface AuthServiceContract {
    * @returns Utilisateur créé et token JWT
    */
   register(dto: RegisterDTO): Promise<IRegisterResponse>;
+
+  /**
+   * Demande de réinitialisation de mot de passe.
+   * Envoie un email si le compte existe. Renvoie toujours un message générique
+   * pour éviter l'énumération d'emails.
+   * @param email - Email pour lequel on demande la réinitialisation
+   * @returns Message générique
+   */
+  forgotPassword(email: string): Promise<{ message: string }>;
 }

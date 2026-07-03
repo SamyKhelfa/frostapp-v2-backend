@@ -11,7 +11,12 @@ import {
   Req,
   Res,
   UseGuards,
+  Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import {FileInterceptor} from '@nestjs/platform-express';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -35,7 +40,10 @@ import { ChangePasswordDTO } from './dto/change-password.dto';
   version: '1',
 })
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @ApiBearerAuth()
   @UseGuards(IsAuthenticatedGuard, RolesGuard)
@@ -136,6 +144,50 @@ export class UserController {
         body.newPassword,
       );
       return res.status(HttpStatus.OK).send({ success: true });
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard)
+  @Post('me/avatar')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadAvatar(
+    @Req() req: any,
+    @UploadedFile() file: Express.Multer.File,
+    @Res() res: Response,
+  ) {
+    try {
+      if (!file) {
+        throw new HttpException('No file provided', HttpStatus.BAD_REQUEST);
+      }
+
+      if (!file.mimetype.startsWith('image/')) {
+        throw new HttpException(
+          'File must be an image',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const MAX_SIZE = 5 * 1024 * 1024;
+      if (file.size > MAX_SIZE) {
+        throw new HttpException(
+          'File too large (max 5MB)',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const avatarUrl = await this.cloudinaryService.uploadAvatar(file);
+
+      const user = await this.userService.updateMe(req.user.id, {
+        avatar: avatarUrl,
+      });
+
+      return res.status(HttpStatus.OK).send(user);
     } catch (error) {
       throw new HttpException(
         error.message,

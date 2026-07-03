@@ -6,6 +6,8 @@ import { JwtConfigModule } from './jwt/jwt.module';
 import { LessonModule } from './lesson/lesson.module';
 import { ChapterModule } from './chapter/chapter.module';
 import { UserModule } from './user/user.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { UserModule } from './user/user.module';
     LessonModule,
     ChapterModule,
     UserModule,
+    CloudinaryModule,
+    EmailModule,
   ],
 })
 export class AppModule {}

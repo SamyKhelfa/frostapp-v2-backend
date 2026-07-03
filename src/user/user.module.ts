@@ -3,9 +3,11 @@ import { IsAuthenticatedGuard } from 'src/guards';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Global()
 @Module({
+  imports: [CloudinaryModule],
   controllers: [UserController],
   providers: [UserService, IsAuthenticatedGuard, RolesGuard],
   exports: [UserService],

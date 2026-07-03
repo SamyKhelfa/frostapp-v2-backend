@@ -13,7 +13,7 @@ import {
 import { Response } from 'express';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { RegisterDTO } from './dto/register.dto';
-import { LoginDTO } from './dto';
+import { ForgotPasswordDTO, LoginDTO } from './dto';
 import { AUTH_SERVICE_TOKEN, AuthServiceContract } from './contracts';
 import { IsAuthenticatedGuard } from '../guards';
 
@@ -72,6 +72,26 @@ export class AuthController {
         authToken,
         user,
       });
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('/forgot-password')
+  @ApiBody({
+    description: 'Demande de réinitialisation de mot de passe',
+    type: ForgotPasswordDTO,
+  })
+  async forgotPassword(
+    @Body() body: ForgotPasswordDTO,
+    @Res() res: Response,
+  ): Promise<Response> {
+    try {
+      const result = await this.authService.forgotPassword(body.email);
+      return res.status(HttpStatus.OK).json(result);
     } catch (error) {
       throw new HttpException(
         error.message,
