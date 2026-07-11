@@ -9,8 +9,7 @@ export class EmailService {
   private readonly senderName = process.env.BREVO_SENDER_NAME ?? 'Frost';
 
   onModuleInit() {
-    // Log de config au démarrage — te dit tout de suite si ton .env est OK
-    this.logger.log('─── Email Service Config ───');
+     this.logger.log('─── Email Service Config ───');
     this.logger.log(
       `BREVO_API_KEY : ${this.apiKey ? `✅ ${this.apiKey.slice(0, 12)}…` : '❌ MANQUANTE'}`,
     );
@@ -21,9 +20,7 @@ export class EmailService {
     this.logger.log('────────────────────────────');
   }
 
-  /**
-   * Envoie un email transactionnel via un template Brevo.
-   */
+
   async sendEmail(
     to: string,
     templateId: number,
@@ -45,7 +42,6 @@ export class EmailService {
       return;
     }
 
-    // Construction du payload Brevo
     const payload = {
       sender: {
         name: this.senderName,
@@ -73,7 +69,6 @@ export class EmailService {
 
       this.logger.log(`  → Statut Brevo: ${response.status} ${response.statusText}`);
 
-      // On lit toujours la réponse pour avoir le message d'erreur détaillé
       const responseText = await response.text();
       this.logger.log(`  → Réponse Brevo: ${responseText}`);
 
@@ -89,7 +84,7 @@ export class EmailService {
       this.logger.error(
         `🔴 Erreur envoi email vers ${to}: ${error.message}`,
       );
-      // On propage l'erreur, à l'appelant de la gérer
+
       throw new HttpException(
         `Failed to send email: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,

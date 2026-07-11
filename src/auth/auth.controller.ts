@@ -12,8 +12,12 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-import { RegisterDTO } from './dto/register.dto';
-import { ForgotPasswordDTO, LoginDTO } from './dto';
+import {
+  ForgotPasswordDTO,
+  LoginDTO,
+  RegisterDTO,
+  ResetPasswordDTO,
+} from './dto';
 import { AUTH_SERVICE_TOKEN, AuthServiceContract } from './contracts';
 import { IsAuthenticatedGuard } from '../guards';
 
@@ -91,6 +95,26 @@ export class AuthController {
   ): Promise<Response> {
     try {
       const result = await this.authService.forgotPassword(body.email);
+      return res.status(HttpStatus.OK).json(result);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('/reset-password')
+  @ApiBody({ type: ResetPasswordDTO })
+  async resetPassword(
+    @Body() body: ResetPasswordDTO,
+    @Res() res: Response,
+  ): Promise<Response> {
+    try {
+      const result = await this.authService.resetPassword(
+        body.token,
+        body.newPassword,
+      );
       return res.status(HttpStatus.OK).json(result);
     } catch (error) {
       throw new HttpException(

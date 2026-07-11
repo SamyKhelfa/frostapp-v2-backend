@@ -1,5 +1,11 @@
 import { JwtService } from '@nestjs/jwt';
-import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { RegisterDTO, LoginDTO } from './dto';
 import { IRegisterResponse, ILoginResponse } from './responses';
@@ -7,8 +13,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import { AuthServiceContract } from './contracts';
 import { EmailService } from '../email/email.service';
+import * as crypto from 'crypto'
 
-// ID du template Brevo pour le mail de réinitialisation
 const RESET_PASSWORD_TEMPLATE_ID = 1;
 
 @Injectable()
@@ -99,18 +105,10 @@ export class AuthService implements AuthServiceContract {
     };
   }
 
-  /**
-   * Demande de réinitialisation de mot de passe.
-   *
-   * - Renvoie TOUJOURS le même message générique (anti-enumeration).
-   * - Si le compte existe, envoie un email via le template Brevo #1.
-   * - Si non, ne fait rien mais log en interne.
-   */
   async forgotPassword(email: string): Promise<{ message: string }> {
     this.logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     this.logger.log(`🔑 forgotPassword() appelé pour: ${email}`);
 
-    // 1. Cherche l'utilisateur en DB
     this.logger.log(`  → recherche du user en DB…`);
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -126,15 +124,26 @@ export class AuthService implements AuthServiceContract {
 
     this.logger.log(`  ✅ User trouvé (id: ${user.id}, name: "${user.name}")`);
 
-    // 2. Génère le token de reset (placeholder pour l'instant)
-    const resetToken = 'todo-generer-un-vrai-token';
-    const resetUrl = `frostapp://reset-password?token=${resetToken}`;
-    this.logger.log(`  → resetUrl généré: ${resetUrl}`);
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(resetToken)
+    .digest('hex');
 
-    // 3. Envoie le mail via Brevo
-    this.logger.log(
-      `  → appel EmailService.sendEmail(email=${email}, templateId=${RESET_PASSWORD_TEMPLATE_ID})`,
-    );
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000)
+
+    await this.prisma.passwordResetToken.deleteMany({
+      where: {userId: user.id},
+    })
+
+    await this.prisma.passwordResetToken.create({
+      data: {tokenHash, userId: user.id, expiresAt},
+    })
+
+    const resetUrl = `frostapp://reset-password?token=${resetToken}`;
+    this.logger.log(`  → resetUrl généré (token en clair envoyé par mail)`);
+
+
 
     try {
       await this.emailService.sendEmail(email, RESET_PASSWORD_TEMPLATE_ID, {
@@ -143,8 +152,7 @@ export class AuthService implements AuthServiceContract {
       });
       this.logger.log(`  ✅ Envoi mail OK pour ${email}`);
     } catch (error) {
-      // On log mais on ne remonte pas l'erreur au client
-      // (sinon on révélerait que l'email existe)
+
       this.logger.error(
         `  🔴 Échec envoi mail pour ${email}: ${error.message}`,
       );
@@ -155,10 +163,49 @@ export class AuthService implements AuthServiceContract {
 
     this.logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-    // Message générique dans tous les cas — anti enumeration
     return {
       message:
         'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.',
     };
+  }
+
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const record = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+      include: { user: true },
+    })
+
+    if (!record) {
+      throw new HttpException(
+        'Lien invalide ou expiré',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (record.usedAt) {
+      throw new HttpException('Lien déjà utilisé', HttpStatus.BAD_REQUEST)
+    }
+
+    if (record.expiresAt < new Date()) {
+      throw new HttpException('Lien expiré', HttpStatus.BAD_REQUEST)
+    }
+
+    const hashPassword = bcrypt.hashSync(newPassword, bcrypt.genSaltSync(10));
+    await this.prisma.user.update({
+      where: { id: record.userId },
+      data: { password: hashPassword },
+    });
+
+    await this.prisma.passwordResetToken.update({
+      where: { id: record.id },
+      data: { usedAt: new Date() },
+    })
+
+    return { message: 'Mot de passe réinitialisé avec succès' };
   }
 }

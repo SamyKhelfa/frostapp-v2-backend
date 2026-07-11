@@ -18,6 +18,7 @@ model User {
   lessons   Lesson[]
   active Boolean @default(true)
   avatar String?
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Lesson {
@@ -60,4 +61,16 @@ model SubChapter {
 enum UserRolesEnum {
   admin
   user
+}
+
+model PasswordResetToken {
+  id Int @id @default(autoincrement())
+  tokenHash String @unique
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
