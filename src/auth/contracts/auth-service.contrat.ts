@@ -16,4 +16,8 @@ export interface AuthServiceContract {
     token: string,
     newPassword: string,
   ): Promise<{ message: string }>;
+
+  verifyEmail(token: string): Promise<{ message: string }>;
+
+  resendVerificationEmail(userId: number): Promise<{ message: string }>;
 }

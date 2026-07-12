@@ -16,6 +16,7 @@ const userPublicSelect = {
   createdAt: true,
   updatedAt: true,
   avatar: true,
+  emailVerified: true,
 } as const;
 
 export type UserPublic = Omit<User, 'password'>;

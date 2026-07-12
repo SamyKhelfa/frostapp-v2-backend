@@ -17,8 +17,10 @@ model User {
   updatedAt DateTime @updatedAt
   lessons   Lesson[]
   active Boolean @default(true)
+  emailVerified Boolean @default(false)
   avatar String?
   passwordResetTokens PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
 }
 
 model Lesson {
@@ -74,3 +76,16 @@ model PasswordResetToken {
 
   @@index([userId])
 }
+
+model EmailVerificationToken {
+  id Int @id @default(autoincrement())
+  tokenHash String @unique
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+

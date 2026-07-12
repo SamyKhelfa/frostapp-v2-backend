@@ -13,9 +13,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import { AuthServiceContract } from './contracts';
 import { EmailService } from '../email/email.service';
-import * as crypto from 'crypto'
+import * as crypto from 'crypto';
 
 const RESET_PASSWORD_TEMPLATE_ID = 1;
+const VERIFY_EMAIL_TEMPLATE_ID = 2;
 
 @Injectable()
 export class AuthService implements AuthServiceContract {
@@ -99,6 +100,31 @@ export class AuthService implements AuthServiceContract {
 
     user.password = '';
 
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(verifyToken)
+      .digest('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await this.prisma.emailVerificationToken.create({
+      data: { tokenHash, userId: user.id, expiresAt },
+    });
+
+    const verifyUrl = `frostapp://verify-email?token=${verifyToken}`;
+
+    try {
+      await this.emailService.sendEmail(email, VERIFY_EMAIL_TEMPLATE_ID, {
+        name: user.name,
+        verifyUrl,
+      });
+      this.logger.log(`  ✅ Mail de vérification envoyé à ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `  🔴 Échec envoi mail de vérif pour ${email}: ${error.message}`,
+      );
+    }
+
     return {
       user,
       authToken,
@@ -128,22 +154,20 @@ export class AuthService implements AuthServiceContract {
     const tokenHash = crypto
       .createHash('sha256')
       .update(resetToken)
-    .digest('hex');
+      .digest('hex');
 
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000)
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
     await this.prisma.passwordResetToken.deleteMany({
-      where: {userId: user.id},
-    })
+      where: { userId: user.id },
+    });
 
     await this.prisma.passwordResetToken.create({
-      data: {tokenHash, userId: user.id, expiresAt},
-    })
+      data: { tokenHash, userId: user.id, expiresAt },
+    });
 
     const resetUrl = `frostapp://reset-password?token=${resetToken}`;
     this.logger.log(`  → resetUrl généré (token en clair envoyé par mail)`);
-
-
 
     try {
       await this.emailService.sendEmail(email, RESET_PASSWORD_TEMPLATE_ID, {
@@ -152,7 +176,6 @@ export class AuthService implements AuthServiceContract {
       });
       this.logger.log(`  ✅ Envoi mail OK pour ${email}`);
     } catch (error) {
-
       this.logger.error(
         `  🔴 Échec envoi mail pour ${email}: ${error.message}`,
       );
@@ -178,7 +201,7 @@ export class AuthService implements AuthServiceContract {
     const record = await this.prisma.passwordResetToken.findUnique({
       where: { tokenHash },
       include: { user: true },
-    })
+    });
 
     if (!record) {
       throw new HttpException(
@@ -188,11 +211,11 @@ export class AuthService implements AuthServiceContract {
     }
 
     if (record.usedAt) {
-      throw new HttpException('Lien déjà utilisé', HttpStatus.BAD_REQUEST)
+      throw new HttpException('Lien déjà utilisé', HttpStatus.BAD_REQUEST);
     }
 
     if (record.expiresAt < new Date()) {
-      throw new HttpException('Lien expiré', HttpStatus.BAD_REQUEST)
+      throw new HttpException('Lien expiré', HttpStatus.BAD_REQUEST);
     }
 
     const hashPassword = bcrypt.hashSync(newPassword, bcrypt.genSaltSync(10));
@@ -204,8 +227,81 @@ export class AuthService implements AuthServiceContract {
     await this.prisma.passwordResetToken.update({
       where: { id: record.id },
       data: { usedAt: new Date() },
-    })
+    });
 
     return { message: 'Mot de passe réinitialisé avec succès' };
+  }
+
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const record = await this.prisma.emailVerificationToken.findUnique({
+      where: { tokenHash },
+      include: { user: true },
+    });
+
+    if (!record) {
+      throw new HttpException(
+        'Lien invalide ou expiré',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (record.usedAt) {
+      throw new HttpException('Lien déjà utilisé', HttpStatus.BAD_REQUEST);
+    }
+    if (record.expiresAt < new Date()) {
+      throw new HttpException('Lien expiré', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: record.userId },
+        data: { emailVerified: true },
+      }),
+      this.prisma.emailVerificationToken.update({
+        where: { id: record.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    return { message: 'Email vérifié avec succès' };
+  }
+
+  async resendVerificationEmail(userId: number): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (user.emailVerified) {
+      throw new HttpException('Email déjà vérifié', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.prisma.emailVerificationToken.deleteMany({
+
+      where: { userId: user.id },
+    });
+
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(verifyToken)
+      .digest('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await this.prisma.emailVerificationToken.create({
+      data: { tokenHash, userId: user.id, expiresAt },
+    });
+
+    const verifyUrl = `frostapp://verify-email?token=${verifyToken}`;
+
+    await this.emailService.sendEmail(user.email, VERIFY_EMAIL_TEMPLATE_ID, {
+      name: user.name,
+      verifyUrl,
+    });
+
+    return { message: 'Mail de vérification renvoyé' };
   }
 }

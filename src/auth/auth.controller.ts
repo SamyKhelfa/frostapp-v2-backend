@@ -17,6 +17,7 @@ import {
   LoginDTO,
   RegisterDTO,
   ResetPasswordDTO,
+  VerifyEmailDTO,
 } from './dto';
 import { AUTH_SERVICE_TOKEN, AuthServiceContract } from './contracts';
 import { IsAuthenticatedGuard } from '../guards';
@@ -114,6 +115,43 @@ export class AuthController {
       const result = await this.authService.resetPassword(
         body.token,
         body.newPassword,
+      );
+      return res.status(HttpStatus.OK).json(result);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('/verify-email')
+  @ApiBody({ type: VerifyEmailDTO })
+  async verifyEmail(
+    @Body() body: VerifyEmailDTO,
+    @Res() res: Response,
+  ): Promise<Response> {
+    try {
+      const result = await this.authService.verifyEmail(body.token);
+      return res.status(HttpStatus.OK).json(result);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('/resend-verification-email')
+  @UseGuards(IsAuthenticatedGuard)
+  @ApiBearerAuth()
+  async resendVerificationEmail(
+    @Req() req: { user: { id: number } },
+    @Res() res: Response,
+  ): Promise<Response> {
+    try {
+      const result = await this.authService.resendVerificationEmail(
+        req.user.id,
       );
       return res.status(HttpStatus.OK).json(result);
     } catch (error) {
