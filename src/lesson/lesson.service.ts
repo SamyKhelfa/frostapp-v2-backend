@@ -33,6 +33,7 @@ export class LessonService implements LessonServiceContract {
     if(!enablePagination) {
       const data = await this.prisma.lesson.findMany({
         orderBy: { id: 'asc' },
+        include: this.includeData,
       });
       return {
         data,
@@ -49,6 +50,7 @@ export class LessonService implements LessonServiceContract {
         orderBy: { id: 'asc' },
         skip,
         take: limit,
+        include: this.includeData,
       }),
       this.prisma.lesson.count(),
     ]);
