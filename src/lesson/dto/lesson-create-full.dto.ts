@@ -15,7 +15,7 @@ import {
  * Arborescence complète d'un cours en une seule requête.
  *
  * Vocabulaire côté admin -> modèle :
- *   cours = Lesson, leçon = Chapter, chapitre = SubChapter.
+ *   cours = Lesson, chapitre = Chapter, sous-chapitre = SubChapter.
  */
 
 export class SubChapterNestedDTO {

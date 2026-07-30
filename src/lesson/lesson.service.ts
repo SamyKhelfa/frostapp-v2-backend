@@ -25,7 +25,7 @@ export class LessonService implements LessonServiceContract {
     },
   };
 
-  // cours = Lesson, leçon = Chapter, chapitre = SubChapter : l'arbre complet.
+  // cours = Lesson, chapitre = Chapter, sous-chapitre = SubChapter.
   private includeTree = {
     chapters: {
       orderBy: { position: 'asc' as const },
@@ -135,8 +135,8 @@ export class LessonService implements LessonServiceContract {
    * Crée l'arborescence complète d'un cours en une seule requête.
    *
    * Les écritures imbriquées de Prisma sont exécutées dans une transaction :
-   * soit le cours, ses leçons et ses chapitres existent tous, soit rien n'est
-   * écrit. C'est ce qui évite les cours à moitié créés quand un niveau échoue.
+   * soit le cours, ses chapitres et ses sous-chapitres existent tous, soit
+   * rien n'est écrit. Pas de cours à moitié créé si un niveau échoue.
    */
   async createFull(dto: LessonCreateFullDTO): Promise<Lesson> {
     const { title, description, users, chapters } = dto;
