@@ -69,6 +69,13 @@ export class ChapterService implements ChapterServiceContract {
   async findById(id: number): Promise<Chapter> {
     return this.prisma.chapter.findUnique({
       where: { id },
+      include: {
+        ...this.includeData,
+        // Les sous-chapitres, pour la vue détaillée d'un chapitre.
+        SubChapter: {
+          orderBy: { position: 'asc' },
+        },
+      },
     });
   }
 

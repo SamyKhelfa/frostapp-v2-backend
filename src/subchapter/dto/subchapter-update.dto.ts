@@ -1,51 +1,79 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
+/** Mise à jour partielle : tout champ absent est laissé tel quel. */
 export class SubChapterUpdateDTO {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'title of the subchapter',
     example: 'Cold shower : Go to the bathrooms',
   })
-  title: string;
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  title?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Description of subchapter',
     example: 'In this subchapter we will see how to start cold shower',
   })
-  description: string;
+  @IsOptional()
+  @IsString()
+  description?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Video of subchapter',
     example: 'Video of how taking cold shower',
   })
-  video: string;
+  @IsOptional()
+  @IsString()
+  video?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Position of subchapter in the chapter',
     example: 1,
   })
-  position: number;
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  position?: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The duration of the video',
     example: 1,
   })
-  duration: number;
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  duration?: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Status of subchapter',
     example: true,
   })
-  status: boolean;
+  @IsOptional()
+  @IsBoolean()
+  status?: boolean;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Active status of subchapter',
     example: true,
   })
-  active: boolean;
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'ID of the chapter this subchapter belongs to',
     example: 1,
   })
-  chapterId: number;
+  @IsOptional()
+  @IsInt()
+  chapterId?: number;
 }

@@ -19,7 +19,7 @@ import { Response } from 'express';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { IsAuthenticatedGuard } from '../guards';
-import { LessonCreateDTO } from './dto';
+import { LessonCreateDTO, LessonCreateFullDTO } from './dto';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
 import { LessonService } from './lesson.service';
 
@@ -101,6 +101,31 @@ export class LessonsController {
   ): Promise<Response> {
     try {
       const lesson = await this.lessonService.create(body);
+
+      return res.status(HttpStatus.CREATED).send(lesson);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard, RolesGuard)
+  @Roles([UserRolesEnum.admin])
+  @Post('/full')
+  @ApiBody({
+    description:
+      'Full course tree: the lesson, its chapters and their subchapters',
+    type: LessonCreateFullDTO,
+  })
+  async createFull(
+    @Body() body: LessonCreateFullDTO,
+    @Res() res: Response,
+  ): Promise<Response> {
+    try {
+      const lesson = await this.lessonService.createFull(body);
 
       return res.status(HttpStatus.CREATED).send(lesson);
     } catch (error) {
