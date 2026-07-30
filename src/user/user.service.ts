@@ -122,6 +122,16 @@ export class UserService {
     });
   }
 
+  async deleteUser(id: number): Promise<void> {
+    const exists = await this.prisma.user.findUnique({ where: { id } });
+
+    if (!exists) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    await this.prisma.user.delete({ where: { id } });
+  }
+
   async changePassword(
     userId: number,
     currentPassword: string,

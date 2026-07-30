@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LessonCreateDTO } from './dto';
 import { getConnectIds } from '../utils';
@@ -117,5 +117,15 @@ export class LessonService implements LessonServiceContract {
     await this.prisma.lesson.delete({
       where: { id },
     });
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    const exists = await this.prisma.user.findUnique({
+      where: { id },
+    })
+    if (!exists) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    await this.prisma.user.delete({ where: { id } });
   }
 }

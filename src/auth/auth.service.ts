@@ -64,6 +64,14 @@ export class AuthService implements AuthServiceContract {
       );
     }
 
+    // Vérifié après le mot de passe : ne révèle pas l'existence du compte
+    if (!user.active) {
+      throw new HttpException(
+        'Ce compte a été désactivé. Contacte le support.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
     const authToken = this.getToken(user);
 
     user.password = '';

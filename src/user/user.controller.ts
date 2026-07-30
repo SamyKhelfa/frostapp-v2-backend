@@ -14,8 +14,9 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  Delete,
 } from '@nestjs/common';
-import {FileInterceptor} from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import {
   ApiBearerAuth,
@@ -244,11 +245,31 @@ export class UserController {
       );
     }
   }
+
+  @ApiBearerAuth()
+  @UseGuards(IsAuthenticatedGuard, RolesGuard)
+  @Roles([UserRolesEnum.admin])
+  @Delete('/:id')
+  @ApiParam({ name: 'id', example: 1 })
+  async deleteUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() req: { user: { id: number } },
+    @Res() res: Response,
+  ) {
+    try {
+      if (req.user.id === id) {
+        return res.status(HttpStatus.BAD_REQUEST).send({
+          message: 'Vous ne pouvez pas supprimer votre propre compte',
+        });
+      }
+
+      await this.userService.deleteUser(id);
+      return res.status(HttpStatus.NO_CONTENT).send();
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 }
-
-
-
-
-
-
-
