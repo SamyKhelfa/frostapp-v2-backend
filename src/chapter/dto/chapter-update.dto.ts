@@ -1,39 +1,54 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
+/** Mise à jour partielle : tout champ absent est laissé tel quel. */
 export class ChapterUpdateDTO {
-    @ApiProperty({
-        description: "Title of chapter",
-        example: "Cold shower: first etape"
-    })
-    title: string;
+  @ApiPropertyOptional({
+    description: 'Title of chapter',
+    example: 'Cold shower: first etape',
+  })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  title?: string;
 
-    @ApiProperty({
-        description: "Description of chapter",
-        example: "In this chapter we will see how to take a cold shower"
-    })
-    description: string;
+  @ApiPropertyOptional({
+    description: 'Description of chapter',
+    example: 'In this chapter we will see how to take a cold shower',
+  })
+  @IsOptional()
+  @IsString()
+  description?: string;
 
-    @ApiProperty({
-        description: "Image of chapter",
-        example: "Bathroom photo"
-    })
-    image: string;
+  @ApiPropertyOptional({
+    description: 'Image of chapter',
+    example: 'Bathroom photo',
+  })
+  @IsOptional()
+  @IsString()
+  image?: string;
 
-    @ApiProperty({
-        description: "Status of chapter",
-        example: true
-    })
-    status: boolean;
+  @ApiPropertyOptional({
+    description: 'Status of chapter',
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  status?: boolean;
 
-    @ApiProperty({
-        description: "Position of chapter in the lesson",
-        example: 1
-    })
-    position: number;
-
-    @ApiProperty({
-        description: "ID of the lesson this chapter belongs to",
-        example: 1
-    })
-    lessonId: number;
+  @ApiPropertyOptional({
+    description: 'Position of chapter in the lesson',
+    example: 1,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  position?: number;
 }

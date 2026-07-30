@@ -40,7 +40,7 @@ model Chapter {
   image       String
   status      Boolean
   position    Int
-  Lesson      Lesson?  @relation(fields: [lessonId], references: [id])
+  Lesson      Lesson?  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   lessonId    Int?
   SubChapter SubChapter[]
   createdAt   DateTime @default(now())
@@ -55,7 +55,7 @@ model SubChapter {
   duration Int
   active Boolean
   position Int
-  Chapter Chapter? @relation(fields: [chapterId], references: [id])
+  Chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   chapterId Int?
   status Boolean
 }

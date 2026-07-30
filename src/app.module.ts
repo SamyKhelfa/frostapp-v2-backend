@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtConfigModule } from './jwt/jwt.module';
 import { LessonModule } from './lesson/lesson.module';
 import { ChapterModule } from './chapter/chapter.module';
+import { SubChapterModule } from './subchapter/subchapter.module';
 import { UserModule } from './user/user.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EmailModule } from './email/email.module';
@@ -20,6 +21,7 @@ import { EmailModule } from './email/email.module';
     AuthModule,
     LessonModule,
     ChapterModule,
+    SubChapterModule,
     UserModule,
     CloudinaryModule,
     EmailModule,
