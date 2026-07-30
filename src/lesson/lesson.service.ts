@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LessonCreateDTO } from './dto';
+import { LessonCreateDTO, LessonCreateFullDTO } from './dto';
 import { getConnectIds } from '../utils';
 import { Lesson } from '@prisma/client';
 import { LessonUpdateDTO } from './dto/lesson-update.dto';
@@ -17,6 +17,24 @@ export class LessonService implements LessonServiceContract {
 
   private includeData = {
     chapters: true,
+    users: {
+      select: {
+        id: true,
+        name: true,
+      },
+    },
+  };
+
+  // cours = Lesson, leçon = Chapter, chapitre = SubChapter : l'arbre complet.
+  private includeTree = {
+    chapters: {
+      orderBy: { position: 'asc' as const },
+      include: {
+        SubChapter: {
+          orderBy: { position: 'asc' as const },
+        },
+      },
+    },
     users: {
       select: {
         id: true,
@@ -75,7 +93,7 @@ export class LessonService implements LessonServiceContract {
       where: {
         id,
       },
-      include: this.includeData,
+      include: this.includeTree,
     });
   }
 
@@ -108,6 +126,50 @@ export class LessonService implements LessonServiceContract {
         },
         chapters: {
           connect: getConnectIds(chapters),
+        },
+      },
+    });
+  }
+
+  /**
+   * Crée l'arborescence complète d'un cours en une seule requête.
+   *
+   * Les écritures imbriquées de Prisma sont exécutées dans une transaction :
+   * soit le cours, ses leçons et ses chapitres existent tous, soit rien n'est
+   * écrit. C'est ce qui évite les cours à moitié créés quand un niveau échoue.
+   */
+  async createFull(dto: LessonCreateFullDTO): Promise<Lesson> {
+    const { title, description, users, chapters } = dto;
+
+    return this.prisma.lesson.create({
+      include: this.includeTree,
+      data: {
+        title,
+        description,
+        users: {
+          connect: getConnectIds(users),
+        },
+        chapters: {
+          create: (chapters ?? []).map((chapter, chapterIndex) => ({
+            title: chapter.title,
+            description: chapter.description ?? '',
+            image: chapter.image ?? '',
+            status: chapter.status ?? false,
+            position: chapter.position ?? chapterIndex + 1,
+            SubChapter: {
+              create: (chapter.subChapters ?? []).map(
+                (subChapter, subChapterIndex) => ({
+                  title: subChapter.title,
+                  description: subChapter.description ?? '',
+                  video: subChapter.video ?? '',
+                  duration: subChapter.duration ?? 0,
+                  status: subChapter.status ?? false,
+                  active: subChapter.active ?? true,
+                  position: subChapter.position ?? subChapterIndex + 1,
+                }),
+              ),
+            },
+          })),
         },
       },
     });
