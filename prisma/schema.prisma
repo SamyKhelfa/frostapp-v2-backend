@@ -42,7 +42,7 @@ model Chapter {
   position    Int
   Lesson      Lesson?  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   lessonId    Int?
-  SubChapter SubChapter[]
+  subChapters SubChapter[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

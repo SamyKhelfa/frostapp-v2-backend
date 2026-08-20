@@ -19,8 +19,11 @@ import { Response } from 'express';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { IsAuthenticatedGuard } from '../guards';
-import { LessonCreateDTO, LessonCreateFullDTO } from './dto';
-import { LessonUpdateDTO } from './dto/lesson-update.dto';
+import {
+  LessonCreateDTO,
+  LessonCreateFullDTO,
+  LessonUpdateDTO,
+} from './dto';
 import { LessonService } from './lesson.service';
 
 @ApiTags('Lesson')

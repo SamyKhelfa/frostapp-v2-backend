@@ -1,9 +1,12 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LessonCreateDTO, LessonCreateFullDTO } from './dto';
+import {
+  LessonCreateDTO,
+  LessonCreateFullDTO,
+  LessonUpdateDTO,
+} from './dto';
 import { getConnectIds } from '../utils';
 import { Lesson } from '@prisma/client';
-import { LessonUpdateDTO } from './dto/lesson-update.dto';
 import { LessonServiceContract } from './contracts';
 import {PaginatedResult,PaginationParams,
 } from 'src/common/interfaces/pagination.interface'
@@ -30,7 +33,7 @@ export class LessonService implements LessonServiceContract {
     chapters: {
       orderBy: { position: 'asc' as const },
       include: {
-        SubChapter: {
+        subChapters: {
           orderBy: { position: 'asc' as const },
         },
       },
@@ -156,7 +159,7 @@ export class LessonService implements LessonServiceContract {
             image: chapter.image ?? '',
             status: chapter.status ?? false,
             position: chapter.position ?? chapterIndex + 1,
-            SubChapter: {
+            subChapters: {
               create: (chapter.subChapters ?? []).map(
                 (subChapter, subChapterIndex) => ({
                   title: subChapter.title,
@@ -179,15 +182,5 @@ export class LessonService implements LessonServiceContract {
     await this.prisma.lesson.delete({
       where: { id },
     });
-  }
-
-  async deleteUser(id: number): Promise<void> {
-    const exists = await this.prisma.user.findUnique({
-      where: { id },
-    })
-    if (!exists) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    }
-    await this.prisma.user.delete({ where: { id } });
   }
 }

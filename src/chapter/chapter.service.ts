@@ -72,7 +72,7 @@ export class ChapterService implements ChapterServiceContract {
       include: {
         ...this.includeData,
         // Les sous-chapitres, pour la vue détaillée d'un chapitre.
-        SubChapter: {
+        subChapters: {
           orderBy: { position: 'asc' },
         },
       },
