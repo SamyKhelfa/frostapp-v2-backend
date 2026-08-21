@@ -8,18 +8,19 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String
-  role  UserRolesEnum @default(user)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  lessons   Lesson[]
-  active Boolean @default(true)
-  emailVerified Boolean @default(false)
-  avatar String?
-  passwordResetTokens PasswordResetToken[]
+  id                      Int                      @id @default(autoincrement())
+  email                   String                   @unique
+  password                String
+  name                    String
+  role                    UserRolesEnum            @default(user)
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  lessons                 Lesson[]
+  active                  Boolean                  @default(true)
+  emailVerified           Boolean                  @default(false)
+  avatar                  String?
+  passwordResetTokens     PasswordResetToken[]
+  progress                UserProgress[]
   emailVerificationTokens EmailVerificationToken[]
 }
 
@@ -34,30 +35,31 @@ model Lesson {
 }
 
 model Chapter {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   title       String
   description String
   image       String
   status      Boolean
   position    Int
-  Lesson      Lesson?  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  Lesson      Lesson?      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   lessonId    Int?
   subChapters SubChapter[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model SubChapter {
-  id Int @id @default(autoincrement())
-  title  String
+  id          Int            @id @default(autoincrement())
+  title       String
   description String
-  video String
-  duration Int
-  active Boolean
-  position Int
-  Chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  chapterId Int?
-  status Boolean
+  video       String
+  duration    Int
+  active      Boolean
+  position    Int
+  Chapter     Chapter?       @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapterId   Int?
+  status      Boolean
+  progress    UserProgress[]
 }
 
 enum UserRolesEnum {
@@ -66,26 +68,36 @@ enum UserRolesEnum {
 }
 
 model PasswordResetToken {
-  id Int @id @default(autoincrement())
-  tokenHash String @unique
-  userId Int
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int       @id @default(autoincrement())
+  tokenHash String    @unique
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
-  usedAt DateTime?
-  createdAt DateTime @default(now())
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([userId])
 }
 
 model EmailVerificationToken {
-  id Int @id @default(autoincrement())
-  tokenHash String @unique
-  userId Int
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int       @id @default(autoincrement())
+  tokenHash String    @unique
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
-  usedAt DateTime?
-  createdAt DateTime @default(now())
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([userId])
 }
+model UserProgress {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subChapterId Int
+  subChapter   SubChapter @relation(fields: [subChapterId], references: [id], onDelete: Cascade)
+  completedAt  DateTime   @default(now())
 
+  @@unique([userId, subChapterId])
+  @@index([userId])
+}
