@@ -7,6 +7,8 @@ import { LessonModule } from './lesson/lesson.module';
 import { ChapterModule } from './chapter/chapter.module';
 import { SubChapterModule } from './subchapter/subchapter.module';
 import { ProgressModule } from './progress/progress.module';
+import { ChatModule } from './chat/chat.module';
+import { NotificationModule } from './notification/notification.module';
 import { UserModule } from './user/user.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EmailModule } from './email/email.module';
@@ -24,6 +26,8 @@ import { EmailModule } from './email/email.module';
     ChapterModule,
     SubChapterModule,
     ProgressModule,
+    ChatModule,
+    NotificationModule,
     UserModule,
     CloudinaryModule,
     EmailModule,

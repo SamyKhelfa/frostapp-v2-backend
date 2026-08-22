@@ -8,19 +8,24 @@ datasource db {
 }
 
 model User {
-  id                      Int                      @id @default(autoincrement())
-  email                   String                   @unique
+  id                      Int                       @id @default(autoincrement())
+  email                   String                    @unique
   password                String
   name                    String
-  role                    UserRolesEnum            @default(user)
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime                 @updatedAt
+  role                    UserRolesEnum             @default(user)
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
   lessons                 Lesson[]
-  active                  Boolean                  @default(true)
-  emailVerified           Boolean                  @default(false)
+  active                  Boolean                   @default(true)
+  emailVerified           Boolean                   @default(false)
   avatar                  String?
   passwordResetTokens     PasswordResetToken[]
   progress                UserProgress[]
+  conversations           ConversationParticipant[]
+  messages                Message[]
+  createdConversations    Conversation[]            @relation("ConversationCreator")
+  notifications           Notification[]            @relation("NotificationRecipient")
+  triggeredNotifications  Notification[]            @relation("NotificationActor")
   emailVerificationTokens EmailVerificationToken[]
 }
 
@@ -90,6 +95,7 @@ model EmailVerificationToken {
 
   @@index([userId])
 }
+
 model UserProgress {
   id           Int        @id @default(autoincrement())
   userId       Int
@@ -100,4 +106,90 @@ model UserProgress {
 
   @@unique([userId, subChapterId])
   @@index([userId])
+}
+
+enum ConversationType {
+  COMMUNITY
+  DIRECT
+}
+
+enum JoinPolicy {
+  OPEN
+  APPROVAL
+}
+
+enum ParticipantRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum ParticipantStatus {
+  ACTIVE
+  PENDING
+}
+
+model Conversation {
+  id            Int                       @id @default(autoincrement())
+  type          ConversationType
+  pairKey       String?                   @unique
+  name          String?
+  description   String?
+  image         String?
+  joinPolicy    JoinPolicy                @default(OPEN)
+  createdById   Int?
+  createdBy     User?                     @relation("ConversationCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  participants  ConversationParticipant[]
+  messages      Message[]
+  notifications Notification[]
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+}
+
+model ConversationParticipant {
+  id             Int               @id @default(autoincrement())
+  role           ParticipantRole   @default(MEMBER)
+  status         ParticipantStatus @default(ACTIVE)
+  conversationId Int
+  conversation   Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         Int
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt     DateTime?
+  muted          Boolean           @default(false)
+  joinedAt       DateTime          @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  authorId       Int
+  author         User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content        String
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+enum NotificationType {
+  JOIN_REQUEST
+  JOIN_APPROVED
+}
+
+model Notification {
+  id             Int              @id @default(autoincrement())
+  userId         Int
+  user           User             @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  type           NotificationType
+  actorId        Int?
+  actor          User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  conversationId Int?
+  conversation   Conversation?    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  readAt         DateTime?
+  createdAt      DateTime         @default(now())
+
+  @@index([userId, createdAt])
 }
