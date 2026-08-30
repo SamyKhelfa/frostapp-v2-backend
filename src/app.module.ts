@@ -9,6 +9,7 @@ import { SubChapterModule } from './subchapter/subchapter.module';
 import { ProgressModule } from './progress/progress.module';
 import { ChatModule } from './chat/chat.module';
 import { NotificationModule } from './notification/notification.module';
+import { ColdShowerModule } from './cold-shower/cold-shower.module';
 import { UserModule } from './user/user.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EmailModule } from './email/email.module';
@@ -28,6 +29,7 @@ import { EmailModule } from './email/email.module';
     ProgressModule,
     ChatModule,
     NotificationModule,
+    ColdShowerModule,
     UserModule,
     CloudinaryModule,
     EmailModule,

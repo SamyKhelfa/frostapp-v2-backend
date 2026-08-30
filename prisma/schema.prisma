@@ -24,6 +24,7 @@ model User {
   conversations           ConversationParticipant[]
   messages                Message[]
   createdConversations    Conversation[]            @relation("ConversationCreator")
+  coldShowers             ColdShowerEntry[]
   notifications           Notification[]            @relation("NotificationRecipient")
   triggeredNotifications  Notification[]            @relation("NotificationActor")
   emailVerificationTokens EmailVerificationToken[]
@@ -192,4 +193,18 @@ model Notification {
   createdAt      DateTime         @default(now())
 
   @@index([userId, createdAt])
+}
+
+model ColdShowerEntry {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  feeling   Int
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
 }
