@@ -2,14 +2,14 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 
-const PASSWORD = 'MotDePasse123';
+const FIXTURE_PLAINTEXT = 'fixture-not-a-real-credential';
 
 function buildUser(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     id: 1,
-    email: 'sam@frost.fr',
+    email: 'member@example.test',
     name: 'Sam',
-    password: bcrypt.hashSync(PASSWORD, 10),
+    password: bcrypt.hashSync(FIXTURE_PLAINTEXT, 10),
     active: true,
     ...overrides,
   };
@@ -43,7 +43,10 @@ describe('AuthService.login', () => {
     const service = buildService(null);
 
     const status = await statusOf(
-      service.login({ email: 'inconnu@frost.fr', password: PASSWORD }),
+      service.login({
+        email: 'unknown@example.test',
+        password: FIXTURE_PLAINTEXT,
+      }),
     );
 
     expect(status).toBe(HttpStatus.UNAUTHORIZED);
@@ -53,7 +56,10 @@ describe('AuthService.login', () => {
     const service = buildService(buildUser());
 
     const status = await statusOf(
-      service.login({ email: 'sam@frost.fr', password: 'mauvais' }),
+      service.login({
+        email: 'member@example.test',
+        password: 'wrong-fixture-value',
+      }),
     );
 
     expect(status).toBe(HttpStatus.UNAUTHORIZED);
@@ -63,7 +69,10 @@ describe('AuthService.login', () => {
     const service = buildService(buildUser({ active: false }));
 
     const status = await statusOf(
-      service.login({ email: 'sam@frost.fr', password: PASSWORD }),
+      service.login({
+        email: 'member@example.test',
+        password: FIXTURE_PLAINTEXT,
+      }),
     );
 
     expect(status).toBe(HttpStatus.FORBIDDEN);
@@ -73,8 +82,8 @@ describe('AuthService.login', () => {
     const service = buildService(buildUser());
 
     const result = await service.login({
-      email: 'sam@frost.fr',
-      password: PASSWORD,
+      email: 'member@example.test',
+      password: FIXTURE_PLAINTEXT,
     });
 
     expect(result.authToken).toBe('signed-token');
