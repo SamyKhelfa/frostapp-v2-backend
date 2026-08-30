@@ -4,10 +4,20 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+const DEV_ORIGINS = ['http://localhost:5173'];
+
+function allowedOrigins(): string[] {
+  const configured = process.env.CORS_ORIGINS?.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  return configured?.length ? configured : DEV_ORIGINS;
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: 'http://localhost:5173',
+      origin: allowedOrigins(),
       credentials: true,
     },
   });

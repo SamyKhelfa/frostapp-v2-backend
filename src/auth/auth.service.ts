@@ -30,6 +30,16 @@ export class AuthService implements AuthServiceContract {
     private emailService: EmailService,
   ) {}
 
+  private buildAppLink(path: string, token: string): string {
+    const webUrl = process.env.APP_WEB_URL?.replace(/\/$/, '');
+
+    if (webUrl) {
+      return `${webUrl}/${path}?token=${token}`;
+    }
+
+    return `frostapp://${path}?token=${token}`;
+  }
+
   private getToken(user: User): string {
     return this.jwtService.sign({
       userId: user.id,
@@ -119,7 +129,7 @@ export class AuthService implements AuthServiceContract {
       data: { tokenHash, userId: user.id, expiresAt },
     });
 
-    const verifyUrl = `frostapp://verify-email?token=${verifyToken}`;
+    const verifyUrl = this.buildAppLink('verify-email', verifyToken);
 
     try {
       await this.emailService.sendEmail(email, VERIFY_EMAIL_TEMPLATE_ID, {
@@ -174,7 +184,7 @@ export class AuthService implements AuthServiceContract {
       data: { tokenHash, userId: user.id, expiresAt },
     });
 
-    const resetUrl = `frostapp://reset-password?token=${resetToken}`;
+    const resetUrl = this.buildAppLink('reset-password', resetToken);
     this.logger.log(`  → resetUrl généré (token en clair envoyé par mail)`);
 
     try {
@@ -303,7 +313,7 @@ export class AuthService implements AuthServiceContract {
       data: { tokenHash, userId: user.id, expiresAt },
     });
 
-    const verifyUrl = `frostapp://verify-email?token=${verifyToken}`;
+    const verifyUrl = this.buildAppLink('verify-email', verifyToken);
 
     await this.emailService.sendEmail(user.email, VERIFY_EMAIL_TEMPLATE_ID, {
       name: user.name,
