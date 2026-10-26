@@ -4,8 +4,11 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  HttpStatus,
   UnauthorizedException,
 } from '@nestjs/common';
+
+export const ACCOUNT_DISABLED = 'ACCOUNT_DISABLED';
 
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
@@ -48,7 +51,12 @@ export class IsAuthenticatedGuard implements CanActivate {
 
     // Le compte peut avoir été désactivé après l'émission du JWT
     if (!user.active) {
-      throw new ForbiddenException('Ce compte a été désactivé.');
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        error: 'Forbidden',
+        code: ACCOUNT_DISABLED,
+        message: 'Ce compte a été désactivé.',
+      });
     }
 
     request.user = user;
