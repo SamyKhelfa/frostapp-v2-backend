@@ -1,4 +1,6 @@
+import { PrismaService } from 'src/prisma/prisma.service';
 import {
+  ColdShowerService,
   currentStreakFrom,
   longestStreakFrom,
   shiftDay,
@@ -69,5 +71,29 @@ describe('longestStreakFrom', () => {
 
   it('vaut un quand aucune journee ne se suit', () => {
     expect(longestStreakFrom(['2026-08-22', '2026-08-20'])).toBe(1);
+  });
+});
+
+describe('effectiveTodayKey', () => {
+  // La methode ne touche pas la base : un service sans Prisma suffit a la tester.
+  const service = new ColdShowerService(null as unknown as PrismaService);
+  const jour = (instant: string) =>
+    service['effectiveTodayKey'](new Date(instant));
+
+  it('rattache une seance de la nuit a la journee de la veille', () => {
+    expect(jour('2026-08-22T01:30:00')).toBe('2026-08-21');
+  });
+
+  it('rattache une seance de la matinee au jour meme', () => {
+    expect(jour('2026-08-22T07:15:00')).toBe('2026-08-22');
+  });
+
+  it('place la bascule a six heures pile', () => {
+    expect(jour('2026-08-22T05:59:59')).toBe('2026-08-21');
+    expect(jour('2026-08-22T06:00:00')).toBe('2026-08-22');
+  });
+
+  it('passe le changement de mois', () => {
+    expect(jour('2026-09-01T02:00:00')).toBe('2026-08-31');
   });
 });
